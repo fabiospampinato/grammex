@@ -1,7 +1,7 @@
 
 /* MAIN */
 
-type MatchHandler<T> = ( ...args: [consumed: string, ...groups: string[], input: string, index: string] ) => T;
+type MatchHandler<T> = ( ...args: string[] ) => T; // ( ...args: [consumed: string, ...groups: string[], input: string, index: string] ) => T
 
 type EagerRule<T, U> = ( state: State<T, U> ) => boolean;
 
