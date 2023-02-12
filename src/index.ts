@@ -49,10 +49,10 @@ const validate = <T, U> ( input: string, rule: Rule<T, U>, options: U ): boolean
 
 /* RULES - PRIMIVITE */
 
-const match = <T, U> ( regex: RegExp, handler?: MatchHandler<T> | T ): EagerRule<T, U> => {
+const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ): EagerRule<T, U> => {
 
-  const source = regex.source;
-  const flags = regex.flags.replace ( /y|$/, 'y' );
+  const source = isString ( target ) ? escapeRegExp ( target ) : target.source;
+  const flags = isString ( target ) ? 'y' : target.flags.replace ( /y|$/, 'y' );
   const re = new RegExp ( source, flags );
 
   return backtrack ( ( state: State<T, U> ): boolean => {

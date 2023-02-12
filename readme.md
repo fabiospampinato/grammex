@@ -14,9 +14,9 @@ The following functions for executing rules are provided:
 
 The following functions for creating a primitive rule are provided:
 
-| Function          | Description                                                                                           |
-| ----------------- | ----------------------------------------------------------------------------------------------------- |
-| `match(regex,fn)` | Creates a new rule that tries to match the input string at the current position with the given regex. |
+| Function          | Description                                                                                                  |
+| ----------------- | ------------------------------------------------------------------------------------------------------------ |
+| `match(regex,fn)` | Creates a new rule that tries to match the input string at the current position with the given regex/string. |
 
 The following higher-order functions for creating a rule out of other rules are provided:
 

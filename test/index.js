@@ -197,6 +197,22 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'creates a rule based on a string', t => {
+
+      const rule = match ( 'f(o)o' );
+
+      const r1 = check ( 'f(o)o', [rule] );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [] );
+
+      const r2 = check ( 'foo', [rule] );
+
+      t.truthy ( r2.error );
+      t.deepEqual ( r2.output, [] );
+
+    });
+
   });
 
   describe ( 'repeat', it => {
