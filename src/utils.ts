@@ -35,18 +35,6 @@ const isObject = ( value: unknown ): value is object => {
 
 };
 
-const isPlainObject = ( value: unknown ): value is Record<string, unknown> => {
-
-  if ( !isObject ( value ) ) return false;
-
-  const prototype = Object.getPrototypeOf ( value );
-
-  if ( prototype === null ) return true;
-
-  return Object.getPrototypeOf ( prototype ) === null;
-
-};
-
 const isRegExp = ( value: unknown ): value is RegExp => {
 
   return value instanceof RegExp;
@@ -87,4 +75,4 @@ const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
 
 /* EXPORT */
 
-export {escapeRegExp, isArray, isFunction, isLazy, isObject, isPlainObject, isRegExp, isString, isUndefined, memoize};
+export {escapeRegExp, isArray, isFunction, isLazy, isObject, isRegExp, isString, isUndefined, memoize};

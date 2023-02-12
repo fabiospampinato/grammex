@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import {escapeRegExp, isArray, isFunction, isLazy, isPlainObject, isRegExp, isString, isUndefined, memoize} from './utils';
+import {escapeRegExp, isArray, isFunction, isLazy, isObject, isRegExp, isString, isUndefined, memoize} from './utils';
 import type {MatchHandler, EagerRule, LazyRule, ImplicitRule, Rule, State} from './types';
 
 /* MAIN */
@@ -212,7 +212,7 @@ const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): EagerRule
 
 };
 
-const lazy = ( getter: Function ): any => { //TSC: But it can't be typed properly due to circular references
+const lazy = ( getter: Function ): any => { //TSC: It can't be typed properly due to circular references
 
   return () => getter;
 
@@ -234,13 +234,7 @@ const resolve = memoize (<T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
   }
 
-  if ( isString ( rule ) ) {
-
-    return match<T, U> ( new RegExp ( escapeRegExp ( rule ) ) );
-
-  }
-
-  if ( isRegExp ( rule ) ) {
+  if ( isString ( rule ) || isRegExp ( rule ) ) {
 
     return match<T, U> ( rule );
 
@@ -252,7 +246,7 @@ const resolve = memoize (<T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
   }
 
-  if ( isPlainObject ( rule ) ) {
+  if ( isObject ( rule ) ) {
 
     return or ( Object.values ( rule ).map ( resolve ) );
 
