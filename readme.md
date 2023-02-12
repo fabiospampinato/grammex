@@ -6,39 +6,39 @@ A tiny PEG-like system for building language grammars with regexes.
 
 The following functions for executing rules are provided:
 
-| Function                         | Description                                                                                                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exec(rule,state)`              | Low-level function for executing a rule with a given state. You might never have to use this.                                                                     |
+| Function                       | Description                                                                                                                                                       |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exec(rule,state)`             | Low-level function for executing a rule with a given state. You might never have to use this.                                                                     |
 | `parse(input,rule,options)`    | High-level function for parsing an input string with a given rule and options. It throws if parsing fails, including if some of the input string wasn't consumed. |
 | `validate(input,rule,options)` | High-level function for matching an input string with a given rule and options. It always returns a boolean.                                                      |
 
 The following functions for creating a primitive rule are provided:
 
-| Function           | Description                                                                                           |
-| ------------------ | ----------------------------------------------------------------------------------------------------- |
+| Function          | Description                                                                                           |
+| ----------------- | ----------------------------------------------------------------------------------------------------- |
 | `match(regex,fn)` | Creates a new rule that tries to match the input string at the current position with the given regex. |
 
 The following higher-order functions for creating a rule out of other rules are provided:
 
-| Function                 | Description                                                                                                            |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| Function               | Description                                                                                                            |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `repeat(rule,min,max)` | Creates a rule that tries to match the given rule at least `min` times and at most `max` times.                        |
-| `optional(rule)`         | Creates a rule that tries to match the given rule zero or one times.                                                   |
-| `star(rule)`             | Creates a rule that tries to match the given rule zero or more times.                                                  |
-| `plus(rule)`             | Creates a rule that tries to match the given rule one or more times.                                                   |
-| `and(rule[])`            | Creates a rule that tries to match all the given rules in sequence, one after the other.                               |
-| `or(rule[])`             | Creates a rule that tries to match any of the given rules, stopping at the first matching one.                         |
-| `not(rule)`              | Creates a rule that tries to not match the given rule. This rule doesn't consume any input, it's a negative lookahead. |
-| `equals(rule)`           | Creates a rule that tries to match the given rule. This rule doesn't consume any input, it's a positive lookahead.     |
-| `backtrack(rule)`        | Creates a rule that undoes all the changes to the state object that the given rule did, in case it doesn't match.      |
+| `optional(rule)`       | Creates a rule that tries to match the given rule zero or one times.                                                   |
+| `star(rule)`           | Creates a rule that tries to match the given rule zero or more times.                                                  |
+| `plus(rule)`           | Creates a rule that tries to match the given rule one or more times.                                                   |
+| `and(rule[])`          | Creates a rule that tries to match all the given rules in sequence, one after the other.                               |
+| `or(rule[])`           | Creates a rule that tries to match any of the given rules, stopping at the first matching one.                         |
+| `not(rule)`            | Creates a rule that tries to not match the given rule. This rule doesn't consume any input, it's a negative lookahead. |
+| `equals(rule)`         | Creates a rule that tries to match the given rule. This rule doesn't consume any input, it's a positive lookahead.     |
+| `backtrack(rule)`      | Creates a rule that undoes all the changes to the state object that the given rule did, in case it doesn't match.      |
 | `lazy(()=>rule)`       | Creates a rule out of a getter for another rule. This is necessary when dealing with circular references.              |
 
 The following shorthands for creating rules are provided:
 
-| Shorthand        | Description                                                                                                             |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `'foo'`          | A string is automatically interpreted as the primitive rule using the regex that would match the provided string.       |
-| `/foo/`          | A regex is automatically interpreted as the primitive rule using the provided regex.                                    |
+| Shorthand       | Description                                                                                                             |
+| --------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `'foo'`         | A string is automatically interpreted as the primitive rule using the regex that would match the provided string.       |
+| `/foo/`         | A regex is automatically interpreted as the primitive rule using the provided regex.                                    |
 | `['foo',/bar/]` | An array of strings and regexes is automatically interpreted as wrapped in an `and` rule.                               |
 | `{Foo,Bar}`     | A plain object with strings and regexes as values is automatically interpreted as those values wrapped in an `or` rule. |
 
