@@ -224,7 +224,7 @@ const resolve = memoize (<T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
     if ( isLazy ( rule ) ) {
 
-      return rule ();
+      return resolve ( rule () );
 
     } else {
 
