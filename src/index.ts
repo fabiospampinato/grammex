@@ -212,6 +212,12 @@ const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): EagerRule
 
 };
 
+const lazy = ( getter: Function ): any => { //TSC: But it can't be typed properly due to circular references
+
+  return () => getter;
+
+};
+
 const resolve = memoize (<T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
   if ( isFunction ( rule ) ) {
@@ -263,5 +269,5 @@ export {match};
 export {repeat, optional, star, plus};
 export {and, or};
 export {not, equals};
-export {backtrack};
+export {backtrack, lazy};
 export type {MatchHandler, EagerRule, LazyRule, ImplicitRule, Rule, State};

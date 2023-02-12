@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {describe} from 'fava';
-import {exec, parse, validate, match, repeat, optional, star, plus, and, or, not, equals, backtrack} from '../dist/index.js';
+import {exec, parse, validate, match, repeat, optional, star, plus, and, or, not, equals, backtrack, lazy} from '../dist/index.js';
 
 /* HELPERS */
 
@@ -415,6 +415,22 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
+
+    });
+
+  });
+
+  describe ( 'lazy', it => {
+
+    it ( 'creates a lazy rule, working around circular references', t => {
+
+      const rule1 = lazy ( () => rule2 );
+      const rule2 = match ( /bar/, String );
+
+      const r1 = check ( 'bar', [rule1] );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['bar'] );
 
     });
 

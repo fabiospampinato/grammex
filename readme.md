@@ -31,6 +31,7 @@ The following higher-order functions for creating a rule out of other rules are 
 | `not(rule)`              | Creates a rule that tries to not match the given rule. This rule doesn't consume any input, it's a negative lookahead. |
 | `equals(rule)`           | Creates a rule that tries to match the given rule. This rule doesn't consume any input, it's a positive lookahead.     |
 | `backtrack(rule)`        | Creates a rule that undoes all the changes to the state object that the given rule did, in case it doesn't match.      |
+| `lazy(()=>rule)`       | Creates a rule out of a getter for another rule. This is necessary when dealing with circular references.              |
 
 The following shorthands for creating rules are provided:
 
