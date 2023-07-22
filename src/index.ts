@@ -6,8 +6,6 @@ import type {MatchHandler, EagerRule, LazyRule, ImplicitRule, Rule, State} from 
 
 /* MAIN */
 
-//TODO: Provide some decent error messages
-
 const exec = <T, U> ( rule: Rule<T, U>, state: State<T, U> ): boolean => {
 
   return resolve ( rule )( state );
@@ -16,7 +14,7 @@ const exec = <T, U> ( rule: Rule<T, U>, state: State<T, U> ): boolean => {
 
 const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
 
-  const state: State<T, U> = { options, input, index: 0, output: [] };
+  const state: State<T, U> = { options, input, index: 0, indexMax: 0, output: [] };
   const matched = exec ( rule, state );
 
   if ( matched && state.index === input.length ) {
@@ -25,7 +23,7 @@ const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
 
   } else {
 
-    throw new Error ( 'Failed to parse' );
+    throw new Error ( `Failed to parse at index ${state.indexMax}` );
 
   }
 
@@ -76,6 +74,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
     }
 
     state.index += consumed.length;
+    state.indexMax = Math.max ( state.indexMax, state.index );
 
     return true;
 

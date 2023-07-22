@@ -165,6 +165,44 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'throws an error mentioning the invalid index, simple grammar', t => {
+
+      const a = star ( 'a' );
+
+      const r1 = check ( 'b', a );
+
+      t.is ( r1.error.message, 'Failed to parse at index 0' );
+
+      const r2 = check ( 'aaab', a );
+
+      t.is ( r2.error.message, 'Failed to parse at index 3' );
+
+    });
+
+    it ( 'throws an error mentioning the invalid index, complex grammar', t => {
+
+      const blockStart = '[start]';
+      const blockContent = lazy ( () => grammar );
+      const blockEnd = '[end]';
+      const block =  and ([ blockStart, blockContent, blockEnd ]);
+      const car = 'car';
+      const cat = 'cat';
+      const grammar = star ( or ([ block, car, cat ]) );
+
+      const r1 = check ( '[start]car', grammar );
+
+      t.is ( r1.error.message, 'Failed to parse at index 10' );
+
+      const r2 = check ( '[start]car[end]cap', grammar );
+
+      t.is ( r2.error.message, 'Failed to parse at index 15' );
+
+      const r3 = check ( 'carcatcarcat[start][start]car[end]car', grammar );
+
+      t.is ( r3.error.message, 'Failed to parse at index 37' );
+
+    });
+
   });
 
   describe ( 'validate', it => {

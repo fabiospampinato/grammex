@@ -11,7 +11,7 @@ type ImplicitRule<T, U> = string | RegExp | Rule<T, U>[] | { [Key in string]: Ru
 
 type Rule<T, U> = EagerRule<T, U> | LazyRule<T, U> | ImplicitRule<T, U>;
 
-type State<T, U> = { options: U, input: string, index: number, output: T[] };
+type State<T, U> = { options: U, input: string, index: number, indexMax: number, output: T[] };
 
 /* EXPORT */
 
