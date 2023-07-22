@@ -6,6 +6,8 @@ import type {MatchHandler, EagerRule, LazyRule, ImplicitRule, Rule, State} from 
 
 /* MAIN */
 
+//TODO: Add support for actual backtracking for repeat/optional/star/plus, both greedy and lazy
+
 const exec = <T, U> ( rule: Rule<T, U>, state: State<T, U> ): boolean => {
 
   return resolve ( rule )( state );
