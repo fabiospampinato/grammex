@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {describe} from 'fava';
-import {exec, parse, validate, match, repeat, optional, star, plus, and, or, not, equals, backtrack, lazy} from '../dist/index.js';
+import {parse, validate, match, repeat, optional, star, plus, and, or, not, equals, backtrack, lazy} from '../dist/index.js';
 
 /* HELPERS */
 
@@ -121,7 +121,7 @@ describe ( 'Grammex', it => {
     it ( 'supports a lazy rule', t => {
 
       const rule = match ( /foo/, 'out' );
-      const lazyRule = () => rule;
+      const lazyRule = lazy ( () => rule );
 
       const r1 = check ( 'foo', lazyRule );
 

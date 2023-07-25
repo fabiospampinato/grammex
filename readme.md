@@ -6,11 +6,10 @@ A tiny PEG-like system for building language grammars with regexes.
 
 The following functions for executing rules are provided:
 
-| Function                       | Description                                                                                                                                                       |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exec(rule,state)`             | Low-level function for executing a rule with a given state. You might never have to use this.                                                                     |
-| `parse(input,rule,options)`    | High-level function for parsing an input string with a given rule and options. It throws if parsing fails, including if some of the input string wasn't consumed. |
-| `validate(input,rule,options)` | High-level function for matching an input string with a given rule and options. It always returns a boolean.                                                      |
+| Function                       | Description                                                                                                                              |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `parse(input,rule,options)`    | Parses an input string with a given rule and options. It throws if parsing fails, including if some of the input string wasn't consumed. |
+| `validate(input,rule,options)` | Parses an input string with a given rule and options. It always returns a boolean.                                                      |
 
 The following functions for creating a primitive rule are provided:
 

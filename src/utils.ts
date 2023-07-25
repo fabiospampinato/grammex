@@ -1,8 +1,4 @@
 
-/* IMPORT */
-
-import type {EagerRule, LazyRule} from './types';
-
 /* MAIN */
 
 const escapeRegExp = ( value: string ): string => {
@@ -23,15 +19,9 @@ const isFunction = ( value: unknown ): value is Function => {
 
 };
 
-const isLazy = <T, U> ( rule: EagerRule<T, U> | LazyRule<T, U> ): rule is LazyRule<T, U> => {
-
-  return !rule.length;
-
-};
-
 const isObject = ( value: unknown ): value is object => {
 
-  return ( typeof value === 'object' && value !== null );
+  return typeof value === 'object' && value !== null;
 
 };
 
@@ -53,26 +43,6 @@ const isUndefined = ( value: unknown ): value is undefined => {
 
 };
 
-const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
-
-  const cache = new Map<T, U> ();
-
-  return ( arg: T ): U => {
-
-    const cached = cache.get ( arg );
-
-    if ( cached ) return cached;
-
-    const value = fn ( arg );
-
-    cache.set ( arg, value );
-
-    return value;
-
-  };
-
-};
-
 /* EXPORT */
 
-export {escapeRegExp, isArray, isFunction, isLazy, isObject, isRegExp, isString, isUndefined, memoize};
+export {escapeRegExp, isArray, isFunction, isObject, isRegExp, isString, isUndefined};
