@@ -203,7 +203,12 @@ const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): EagerRule
     if ( !matched || force ) {
 
       state.index = index;
-      state.output.length = length;
+
+      if ( state.output.length !== length ) { // This can be surprisingly slow
+
+        state.output.length = length;
+
+      }
 
     }
 
