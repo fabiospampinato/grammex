@@ -47,7 +47,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
   if ( isString ( target ) ) { // Matching a string, slightly faster
 
-    return backtrack ( ( state: State<T, U> ): boolean => {
+    return ( state: State<T, U> ): boolean => {
 
       const index = state.index;
       const input = state.input;
@@ -71,7 +71,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
       return true;
 
-    });
+    };
 
   } else { // Matching a regex, slightly slower
 
@@ -79,7 +79,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
     const flags = isString ( target ) ? 'y' : target.flags.replace ( /y|$/, 'y' );
     const re = new RegExp ( source, flags );
 
-    return backtrack ( ( state: State<T, U> ): boolean => {
+    return ( state: State<T, U> ): boolean => {
 
       const index = state.index;
 
@@ -102,7 +102,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
       return true;
 
-    });
+    };
 
   }
 
