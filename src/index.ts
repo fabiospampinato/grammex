@@ -335,7 +335,7 @@ const lazy = <T = any, U = any> ( getter: Function ): ExplicitRule<T, U> => { //
 
   return ( state: State<T, U> ): boolean => {
 
-    erule ||= getter ();
+    erule ||= resolve ( getter () );
 
     return erule ( state );
 
