@@ -1,12 +1,6 @@
 
 /* MAIN */
 
-const escapeRegExp = ( value: string ): string => {
-
-  return value.replace ( /([$.*+?^(){}[\]\|])/g, char => `\\${char}` );
-
-};
-
 const isArray = ( value: unknown ): value is unknown[] => {
 
   return Array.isArray ( value );
@@ -45,4 +39,4 @@ const isUndefined = ( value: unknown ): value is undefined => {
 
 /* EXPORT */
 
-export {escapeRegExp, isArray, isFunction, isObject, isRegExp, isString, isUndefined};
+export {isArray, isFunction, isObject, isRegExp, isString, isUndefined};

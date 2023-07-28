@@ -1,12 +1,10 @@
 
 /* IMPORT */
 
-import {escapeRegExp, isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
-import type {MatchHandler, EagerRule, ImplicitRule, Rule, State} from './types';
+import {isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
+import type {MatchHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
 
 /* MAIN */
-
-//TODO: Add support for actual backtracking for repeat/optional/star/plus, both greedy and lazy
 
 const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
 
@@ -43,7 +41,7 @@ const validate = <T, U> ( input: string, rule: Rule<T, U>, options: U ): boolean
 
 /* RULES - PRIMIVITE */
 
-const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ): EagerRule<T, U> => {
+const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ): ExplicitRule<T, U> => {
 
   if ( isString ( target ) ) { // Matching a string, slightly faster
 
@@ -60,7 +58,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
       if ( !isUndefined ( handler ) ) {
 
-        const output = isFunction ( handler ) ? handler ( target, state.input, String ( index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( target, input, String ( index ) ) : handler;
 
         state.output.push ( output );
 
@@ -75,23 +73,24 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
   } else { // Matching a regex, slightly slower
 
-    const source = isString ( target ) ? escapeRegExp ( target ) : target.source;
-    const flags = isString ( target ) ? 'y' : target.flags.replace ( /y|$/, 'y' );
+    const source = target.source;
+    const flags = target.flags.replace ( /y|$/, 'y' );
     const re = new RegExp ( source, flags );
 
     return ( state: State<T, U> ): boolean => {
 
       const index = state.index;
+      const input = state.input;
 
       re.lastIndex = index;
 
-      const match = re.exec ( state.input );
+      const match = re.exec ( input );
 
       if ( !match ) return false;
 
       if ( !isUndefined ( handler ) ) {
 
-        const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( ...match, input, String ( index ) ) : handler;
 
         state.output.push ( output );
 
@@ -110,7 +109,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
 /* RULES - REPETITION */
 
-const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): EagerRule<T, U> => {
+const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
@@ -126,7 +125,7 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): EagerRule<
 
       repetitions += 1;
 
-      if ( repetitions >= min && state.index === state.input.length ) break;
+      if (  state.index === state.input.length ) break;
 
     }
 
@@ -136,19 +135,19 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): EagerRule<
 
 };
 
-const optional = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const optional = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return repeat ( rule, 0, 1 );
 
 };
 
-const star = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const star = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return repeat ( rule, 0, Infinity );
 
 };
 
-const plus = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const plus = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return repeat ( rule, 1, Infinity );
 
@@ -156,7 +155,7 @@ const plus = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
 /* RULES - SEQUENCE */
 
-const and = <T, U> ( rules: Rule<T, U>[] ): EagerRule<T, U> => {
+const and = <T, U> ( rules: Rule<T, U>[] ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
@@ -176,7 +175,7 @@ const and = <T, U> ( rules: Rule<T, U>[] ): EagerRule<T, U> => {
 
 };
 
-const or = <T, U> ( rules: Rule<T, U>[] ): EagerRule<T, U> => {
+const or = <T, U> ( rules: Rule<T, U>[] ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
@@ -198,7 +197,7 @@ const or = <T, U> ( rules: Rule<T, U>[] ): EagerRule<T, U> => {
 
 /* RULES - LOOKAHEAD */
 
-const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): EagerRule<T, U> => {
+const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
@@ -210,13 +209,13 @@ const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): EagerRule<T, U> 
 
 };
 
-const not = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const not = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return lookahead ( rule, false );
 
 };
 
-const equals = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const equals = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return lookahead ( rule, true );
 
@@ -224,7 +223,7 @@ const equals = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
 
 /* RULES - OTHERS */
 
-const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): EagerRule<T, U> => {
+const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
@@ -252,9 +251,9 @@ const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): EagerRule
 
 };
 
-const lazy = <T = any, U = any> ( getter: Function ): EagerRule<T, U> => { //TSC: It can't be typed properly due to circular references
+const lazy = <T = any, U = any> ( getter: Function ): ExplicitRule<T, U> => { //TSC: It can't be typed properly due to circular references
 
-  let erule: EagerRule<T, U>;
+  let erule: ExplicitRule<T, U>;
 
   return ( state: State<T, U> ): boolean => {
 
@@ -266,7 +265,7 @@ const lazy = <T = any, U = any> ( getter: Function ): EagerRule<T, U> => { //TSC
 
 };
 
-const resolve = <T, U> ( rule: Rule<T, U> ): EagerRule<T, U> => {
+const resolve = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   if ( isFunction ( rule ) ) {
 
@@ -304,4 +303,4 @@ export {repeat, optional, star, plus};
 export {and, or};
 export {not, equals};
 export {backtrack, lazy};
-export type {MatchHandler, EagerRule, ImplicitRule, Rule, State};
+export type {MatchHandler, ExplicitRule, ImplicitRule, Rule, State};
