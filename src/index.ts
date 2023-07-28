@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
-import type {RepeatHandler, OptionalHandler, StarHandler, PlusHandler, AndHandler, OrHandler, MatchHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
+import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
 
 /* MAIN */
 
@@ -41,7 +41,7 @@ const validate = <T, U> ( input: string, rule: Rule<T, U>, options: U ): boolean
 
 /* RULES - PRIMIVITE */
 
-const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ): ExplicitRule<T, U> => {
+const match = <T, U> ( target: RegExp | string, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T, U> => {
 
   if ( isString ( target ) ) { // Matching a string, slightly faster
 
@@ -109,7 +109,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
 /* RULES - REPETITION */
 
-const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: RepeatHandler<T> ): ExplicitRule<T, U> => {
+const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
@@ -148,21 +148,19 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: Re
 
 };
 
-const optional = <T, U> ( rule: Rule<T, U>, handler?: OptionalHandler<T> ): ExplicitRule<T, U> => {
+const optional = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
-  const hn = handler ? ( tokens: T[] ) => handler ( tokens[0] ): undefined;
-
-  return repeat ( rule, 0, 1, hn );
+  return repeat ( rule, 0, 1, handler );
 
 };
 
-const star = <T, U> ( rule: Rule<T, U>, handler?: StarHandler<T> ): ExplicitRule<T, U> => {
+const star = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
   return repeat ( rule, 0, Infinity, handler );
 
 };
 
-const plus = <T, U> ( rule: Rule<T, U>, handler?: PlusHandler<T> ): ExplicitRule<T, U> => {
+const plus = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
   return repeat ( rule, 1, Infinity, handler );
 
@@ -170,7 +168,7 @@ const plus = <T, U> ( rule: Rule<T, U>, handler?: PlusHandler<T> ): ExplicitRule
 
 /* RULES - SEQUENCE */
 
-const and = <T, U> ( rules: Rule<T, U>[], handler?: AndHandler<T> ): ExplicitRule<T, U> => {
+const and = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
@@ -201,7 +199,7 @@ const and = <T, U> ( rules: Rule<T, U>[], handler?: AndHandler<T> ): ExplicitRul
 
 };
 
-const or = <T, U> ( rules: Rule<T, U>[], handler?: OrHandler<T> ): ExplicitRule<T, U> => {
+const or = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
@@ -350,4 +348,4 @@ export {repeat, optional, star, plus};
 export {and, or};
 export {not, equals};
 export {lazy};
-export type {MatchHandler, ExplicitRule, ImplicitRule, Rule, State};
+export type {PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, State};

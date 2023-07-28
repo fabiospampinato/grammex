@@ -373,10 +373,10 @@ describe ( 'Grammex', it => {
 
       const rule = match ( /o/, '0' );
 
-      const r1 = check ( 'o', optional ( rule, token => ({ child: token }) ) );
+      const r1 = check ( 'o', optional ( rule, tokens => ({ children: tokens }) ) );
 
       t.falsy ( r1.error );
-      t.deepEqual ( r1.output, [{ child: '0' }] );
+      t.deepEqual ( r1.output, [{ children: ['0'] }] );
 
     });
 
