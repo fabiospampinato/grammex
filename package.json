@@ -9,6 +9,8 @@
   "types": "./dist/index.d.ts",
   "sideEffects": false,
   "scripts": {
+    "benchmark": "tsex benchmark",
+    "benchmark:watch": "tsex benchmark --watch",
     "clean": "tsex clean",
     "compile": "tsex compile",
     "compile:watch": "tsex compile --watch",
@@ -25,6 +27,7 @@
     "grammar"
   ],
   "devDependencies": {
+    "benchloop": "^2.1.0",
     "fava": "^0.2.0",
     "tsex": "^2.2.4",
     "typescript": "^4.9.5"
