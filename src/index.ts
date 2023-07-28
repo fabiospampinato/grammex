@@ -2,13 +2,13 @@
 /* IMPORT */
 
 import {isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
-import type {MatchHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
+import type {RepeatHandler, OptionalHandler, StarHandler, PlusHandler, AndHandler, OrHandler, MatchHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
 
 /* MAIN */
 
 const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
 
-  const state: State<T, U> = { options, input, index: 0, indexMax: 0, output: [] };
+  const state: State<T, U> = { dry: 0, options, input, index: 0, indexMax: 0, output: [] };
   const matched = resolve ( rule )( state );
 
   if ( matched && state.index === input.length ) {
@@ -56,7 +56,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
       }
 
-      if ( !isUndefined ( handler ) ) {
+      if ( !isUndefined ( handler ) && !state.dry ) {
 
         const output = isFunction ( handler ) ? handler ( target, input, String ( index ) ) : handler;
 
@@ -88,7 +88,7 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
       if ( !match ) return false;
 
-      if ( !isUndefined ( handler ) ) {
+      if ( !isUndefined ( handler ) && !state.dry ) {
 
         const output = isFunction ( handler ) ? handler ( ...match, input, String ( index ) ) : handler;
 
@@ -109,11 +109,13 @@ const match = <T, U> ( target: RegExp | string, handler?: MatchHandler<T> | T ):
 
 /* RULES - REPETITION */
 
-const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): ExplicitRule<T, U> => {
+const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: RepeatHandler<T> ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
   return backtrack ( ( state: State<T, U> ): boolean => {
+
+    const length = state.output.length;
 
     let repetitions = 0;
 
@@ -129,37 +131,52 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number ): ExplicitRu
 
     }
 
-    return ( repetitions >= min );
+    const matched = ( repetitions >= min );
+
+    if ( handler && !state.dry ) {
+
+      const tokens = state.output.splice ( length, Infinity );
+      const output = handler ( tokens );
+
+      state.output.push ( output );
+
+    }
+
+    return matched;
 
   });
 
 };
 
-const optional = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+const optional = <T, U> ( rule: Rule<T, U>, handler?: OptionalHandler<T> ): ExplicitRule<T, U> => {
 
-  return repeat ( rule, 0, 1 );
+  const hn = handler ? ( tokens: T[] ) => handler ( tokens[0] ): undefined;
 
-};
-
-const star = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
-
-  return repeat ( rule, 0, Infinity );
+  return repeat ( rule, 0, 1, hn );
 
 };
 
-const plus = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+const star = <T, U> ( rule: Rule<T, U>, handler?: StarHandler<T> ): ExplicitRule<T, U> => {
 
-  return repeat ( rule, 1, Infinity );
+  return repeat ( rule, 0, Infinity, handler );
+
+};
+
+const plus = <T, U> ( rule: Rule<T, U>, handler?: PlusHandler<T> ): ExplicitRule<T, U> => {
+
+  return repeat ( rule, 1, Infinity, handler );
 
 };
 
 /* RULES - SEQUENCE */
 
-const and = <T, U> ( rules: Rule<T, U>[] ): ExplicitRule<T, U> => {
+const and = <T, U> ( rules: Rule<T, U>[], handler?: AndHandler<T> ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
   return backtrack ( ( state: State<T, U> ): boolean => {
+
+    const length = state.output.length;
 
     for ( let i = 0, l = erules.length; i < l; i++ ) {
 
@@ -169,23 +186,47 @@ const and = <T, U> ( rules: Rule<T, U>[] ): ExplicitRule<T, U> => {
 
     }
 
+    if ( handler && !state.dry ) {
+
+      const tokens = state.output.splice ( length, Infinity );
+      const output = handler ( tokens );
+
+      state.output.push ( output );
+
+    }
+
     return true;
 
   });
 
 };
 
-const or = <T, U> ( rules: Rule<T, U>[] ): ExplicitRule<T, U> => {
+const or = <T, U> ( rules: Rule<T, U>[], handler?: OrHandler<T> ): ExplicitRule<T, U> => {
 
   const erules = rules.map ( resolve );
 
   return backtrack ( ( state: State<T, U> ): boolean => {
 
+    const length = state.output.length;
+
     for ( let i = 0, l = erules.length; i < l; i++ ) {
 
       const matched = erules[i]( state );
 
-      if ( matched ) return true;
+      if ( matched ) {
+
+        if ( handler && !state.dry ) {
+
+          const tokens = state.output.splice ( length, Infinity );
+          const output = handler ( tokens );
+
+          state.output.push ( output );
+
+        }
+
+        return true;
+
+      }
 
     }
 
@@ -203,7 +244,13 @@ const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): ExplicitRule<T, 
 
   return backtrack ( ( state: State<T, U> ): boolean => {
 
-    return erule ( state ) === result;
+    state.dry += 1;
+
+    const matched = erule ( state ) === result;
+
+    state.dry -= 1;
+
+    return matched;
 
   }, true );
 
@@ -302,5 +349,5 @@ export {match};
 export {repeat, optional, star, plus};
 export {and, or};
 export {not, equals};
-export {backtrack, lazy};
+export {lazy};
 export type {MatchHandler, ExplicitRule, ImplicitRule, Rule, State};
