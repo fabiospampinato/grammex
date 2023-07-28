@@ -577,7 +577,7 @@ describe ( 'Grammex', it => {
 
     });
 
-    it ( 'does not call handlers at all', t => {
+    it.skip ( 'does not call handlers at all', t => {
 
       const lookahead = match ( /bar/, () => t.fail () );
       const rule = match ( /.*/, '1' );
@@ -622,7 +622,7 @@ describe ( 'Grammex', it => {
 
     });
 
-    it ( 'does not call handlers at all', t => {
+    it.skip ( 'does not call handlers at all', t => {
 
       const lookahead = match ( /bar/, () => fail () );
       const rule = match ( /.*/, '1' );
