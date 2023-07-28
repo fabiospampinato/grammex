@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {describe} from 'fava';
-import {parse, validate, match, repeat, optional, star, plus, and, or, not, equals, backtrack, lazy} from '../dist/index.js';
+import {parse, validate, match, repeat, optional, star, plus, and, or, not, equals, lazy} from '../dist/index.js';
 
 /* HELPERS */
 
@@ -251,6 +251,28 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not hang on regexes that do not consume input', t => {
+
+      const rule = match ( /.?/, '0' );
+
+      const r1 = check ( '', rule );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['0'] );
+
+    });
+
+    it ( 'does not hang on strings that do not consume input', t => {
+
+      const rule = match ( '', '0' );
+
+      const r1 = check ( '', rule );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['0'] );
+
+    });
+
   });
 
   describe ( 'repeat', it => {
@@ -276,6 +298,18 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not backtrack', t => {
+
+      const rule = match ( /o/, '0' );
+      const single = 'o';
+
+      const r1 = check ( 'ooo', and ([ repeat ( rule, 1, 3 ), single ]) );
+
+      t.truthy ( r1.error );
+      t.deepEqual ( r1.output, [] );
+
+    });
+
     it ( 'does not hang on rules that do not consume input', t => {
 
       const rule = match ( /^/, '0' );
@@ -284,6 +318,17 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['0'] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const rule = match ( /o/, '0' );
+
+      const r1 = check ( 'ooo', repeat ( rule, 1, 3, tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['0', '0', '0'] }] );
 
     });
 
@@ -312,6 +357,29 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not backtrack', t => {
+
+      const rule = match ( /o/, '0' );
+      const single = 'o';
+
+      const r1 = check ( 'o', and ([ optional ( rule ), single ]) );
+
+      t.truthy ( r1.error );
+      t.deepEqual ( r1.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const rule = match ( /o/, '0' );
+
+      const r1 = check ( 'o', optional ( rule, token => ({ child: token }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ child: '0' }] );
+
+    });
+
   });
 
   describe ( 'star', it => {
@@ -334,6 +402,29 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r3.error );
       t.deepEqual ( r3.output, ['0', '0', '0', '0', '0'] );
+
+    });
+
+    it ( 'does not backtrack', t => {
+
+      const rule = match ( /o/, '0' );
+      const single = 'o';
+
+      const r1 = check ( 'ooooo', and ([ star ( rule ), single ]) );
+
+      t.truthy ( r1.error );
+      t.deepEqual ( r1.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const rule = match ( /o/, '0' );
+
+      const r1 = check ( 'ooo', star ( rule, tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['0', '0', '0'] }] );
 
     });
 
@@ -362,6 +453,29 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not backtrack', t => {
+
+      const rule = match ( /o/, '0' );
+      const single = 'o';
+
+      const r1 = check ( 'ooooo', and ([ plus ( rule ), single ]) );
+
+      t.truthy ( r1.error );
+      t.deepEqual ( r1.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const rule = match ( /o/, '0' );
+
+      const r1 = check ( 'ooo', plus ( rule, tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['0', '0', '0'] }] );
+
+    });
+
   });
 
   describe ( 'and', it => {
@@ -373,10 +487,22 @@ describe ( 'Grammex', it => {
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [] );
 
-      const r2 = check ( 'faofoo', ['foo', /f.o/] );
+      const r2 = check ( 'faofoo', and ([ 'foo', /f.o/ ]) );
 
       t.truthy ( r2.error );
       t.deepEqual ( r2.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const rule1 = match ( 'foo', 'foo' );
+      const rule2 = match ( /f.o/, 'f.o' );
+
+      const r1 = check ( 'foofoo', and ( [rule1, rule2], tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['foo', 'f.o'] }] );
 
     });
 
@@ -389,20 +515,32 @@ describe ( 'Grammex', it => {
       const alt1 = 'boo';
       const alt2 = /f.o/;
 
-      const r1 = check ( 'boo', { alt1, alt2 } );
+      const r1 = check ( 'boo', or ([ alt1, alt2 ]) );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [] );
 
-      const r2 = check ( 'fao', { alt1, alt2 } );
+      const r2 = check ( 'fao', or ([ alt1, alt2 ]) );
 
       t.falsy ( r2.error );
       t.deepEqual ( r2.output, [] );
 
-      const r3 = check ( 'faofoo', { alt1, alt2 } );
+      const r3 = check ( 'faofoo', or ([ alt1, alt2 ]) );
 
       t.truthy ( r3.error );
       t.deepEqual ( r3.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const alt1 = match ( 'boo', 'boo' );
+      const alt2 = match ( /f.o/, 'f.o' );
+
+      const r1 = check ( 'boo', or ( [alt1, alt2], tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['boo'] }] );
 
     });
 
@@ -439,6 +577,18 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not call handlers at all', t => {
+
+      const lookahead = match ( /bar/, () => t.fail () );
+      const rule = match ( /.*/, '1' );
+
+      const r1 = check ( 'barfoo', [not ([ lookahead, lookahead ]), rule] );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['1'] );
+
+    });
+
   });
 
   describe ( 'equals', it => {
@@ -466,6 +616,18 @@ describe ( 'Grammex', it => {
       const rule = match ( /.*/, '1' );
 
       const r1 = check ( 'bar', [equals ( lookahead ), rule] );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['1'] );
+
+    });
+
+    it ( 'does not call handlers at all', t => {
+
+      const lookahead = match ( /bar/, () => fail () );
+      const rule = match ( /.*/, '1' );
+
+      const r1 = check ( 'barfoo', [equals ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
