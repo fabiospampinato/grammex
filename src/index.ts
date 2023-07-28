@@ -113,9 +113,7 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: Co
 
   const erule = resolve ( rule );
 
-  return backtrack ( ( state: State<T, U> ): boolean => {
-
-    const length = state.output.length;
+  return handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
 
     let repetitions = 0;
 
@@ -131,20 +129,9 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: Co
 
     }
 
-    const matched = ( repetitions >= min );
+    return ( repetitions >= min );
 
-    if ( handler && !state.dry ) {
-
-      const tokens = state.output.splice ( length, Infinity );
-      const output = handler ( tokens );
-
-      state.output.push ( output );
-
-    }
-
-    return matched;
-
-  });
+  }), handler );
 
 };
 
@@ -172,9 +159,7 @@ const and = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): Explic
 
   const erules = rules.map ( resolve );
 
-  return backtrack ( ( state: State<T, U> ): boolean => {
-
-    const length = state.output.length;
+  return handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
 
     for ( let i = 0, l = erules.length; i < l; i++ ) {
 
@@ -184,18 +169,9 @@ const and = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): Explic
 
     }
 
-    if ( handler && !state.dry ) {
-
-      const tokens = state.output.splice ( length, Infinity );
-      const output = handler ( tokens );
-
-      state.output.push ( output );
-
-    }
-
     return true;
 
-  });
+  }), handler );
 
 };
 
@@ -203,34 +179,19 @@ const or = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): Explici
 
   const erules = rules.map ( resolve );
 
-  return backtrack ( ( state: State<T, U> ): boolean => {
-
-    const length = state.output.length;
+  return handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
 
     for ( let i = 0, l = erules.length; i < l; i++ ) {
 
       const matched = erules[i]( state );
 
-      if ( matched ) {
-
-        if ( handler && !state.dry ) {
-
-          const tokens = state.output.splice ( length, Infinity );
-          const output = handler ( tokens );
-
-          state.output.push ( output );
-
-        }
-
-        return true;
-
-      }
+      if ( matched ) return true;
 
     }
 
     return false;
 
-  });
+  }), handler );
 
 };
 
@@ -240,17 +201,11 @@ const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): ExplicitRule<T, 
 
   const erule = resolve ( rule );
 
-  return backtrack ( ( state: State<T, U> ): boolean => {
+  return dryable ( backtrackable ( ( state: State<T, U> ): boolean => {
 
-    state.dry += 1;
+    return erule ( state ) === result;
 
-    const matched = erule ( state ) === result;
-
-    state.dry -= 1;
-
-    return matched;
-
-  }, true );
+  }, true ) );
 
 };
 
@@ -266,9 +221,9 @@ const equals = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
 };
 
-/* RULES - OTHERS */
+/* RULES - DECORATORS */
 
-const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): ExplicitRule<T, U> => {
+const backtrackable = <T, U> ( rule: Rule<T, U>, force: boolean = false ): ExplicitRule<T, U> => {
 
   const erule = resolve ( rule );
 
@@ -295,6 +250,50 @@ const backtrack = <T, U> ( rule: Rule<T, U>, force: boolean = false ): ExplicitR
   };
 
 };
+
+const dryable = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+
+  const erule = resolve ( rule );
+
+  return ( state: State<T, U> ): boolean => {
+
+    state.dry += 1;
+
+    const matched = erule ( state );
+
+    state.dry -= 1;
+
+    return matched;
+
+  };
+
+};
+
+const handleable = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+
+  const erule = resolve ( rule );
+
+  return ( state: State<T, U> ): boolean => {
+
+    const length = state.output.length;
+    const matched = erule ( state );
+
+    if ( matched && handler && !state.dry ) {
+
+      const tokens = state.output.splice ( length, Infinity );
+      const output = handler ( tokens );
+
+      state.output.push ( output );
+
+    }
+
+    return matched;
+
+  };
+
+};
+
+/* RULES - OTHERS */
 
 const lazy = <T = any, U = any> ( getter: Function ): ExplicitRule<T, U> => { //TSC: It can't be typed properly due to circular references
 
