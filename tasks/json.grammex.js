@@ -20,7 +20,7 @@ const String = /\s*"(?:\\.|\\u[0-9A-Fa-f]{4}|[^"])*"\s*/;
 const Array = ['[', _, optional ([ LAZY_JSON, star ([ ',', LAZY_JSON ]) ]), _, ']'];
 const Object = ['{', _, optional ([ String, ':', LAZY_JSON, star ([ ',', String, ':', LAZY_JSON ]) ]), _, '}'];
 
-const JSON = [optional ( _ ), { Object, Array, String, True, False, Null, Number }, optional ( _ )];
+const JSON = [_, { Object, Array, String, True, False, Null, Number }, _];
 
 /* EXPORT */
 

@@ -4,7 +4,8 @@
 import benchmark from 'benchloop';
 import fs from 'node:fs';
 import {parse} from '../dist/index.js';
-import JSON_GRAMMAR from './json.js';
+import JSON_GRAMMEX from './json.grammex.js';
+import JSON_HERA from './json.hera.js';
 
 /* HELPERS */
 
@@ -19,7 +20,14 @@ benchmark.config ({
 benchmark ({
   name: 'grammex.parse',
   fn: () => {
-    parse ( JSON_SAMPLE, JSON_GRAMMAR, {} );
+    parse ( JSON_SAMPLE, JSON_GRAMMEX, {} );
+  }
+});
+
+benchmark ({
+  name: 'hera.parse',
+  fn: () => {
+    JSON_HERA.parse ( JSON_SAMPLE );
   }
 });
 
