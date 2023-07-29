@@ -179,11 +179,11 @@ const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<
 
   const erules = rules.map ( resolve );
 
-  return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
+  return memoizable ( handleable ( ( state: State<T> ): boolean => {
 
     return erules.some ( erule => erule ( state ) );
 
-  }), handler ));
+  }, handler ));
 
 };
 
@@ -197,7 +197,7 @@ const jump = <T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T> 
 
   }
 
-  return handleable ( backtrackable ( ( state: State<T> ): boolean => {
+  return handleable ( ( state: State<T> ): boolean => {
 
     const char = state.input[state.index];
     const erule = erules[char] || erules['default'];
@@ -212,7 +212,7 @@ const jump = <T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T> 
 
     }
 
-  }), handler );
+  }, handler );
 
 };
 
