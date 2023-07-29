@@ -49,6 +49,26 @@ const isUndefined = ( value: unknown ): value is undefined => {
 
 };
 
+const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
+
+  const cache = new Map<T, U> ();
+
+  return ( arg: T ): U => {
+
+    const cached = cache.get ( arg );
+
+    if ( cached ) return cached;
+
+    const value = fn ( arg );
+
+    cache.set ( arg, value );
+
+    return value;
+
+  };
+
+};
+
 /* EXPORT */
 
-export {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined};
+export {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined, memoize};

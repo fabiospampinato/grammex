@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined} from './utils';
+import {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined, memoize} from './utils';
 import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
 
 /* MAIN */
@@ -393,7 +393,7 @@ const lazy = <T = any> ( getter: Function ): ExplicitRule<T> => { //TSC: It can'
 
 };
 
-const resolve = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
+const resolve = memoize (<T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
   if ( isFunction ( rule ) ) {
 
@@ -427,7 +427,7 @@ const resolve = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
   throw new Error ( 'Invalid rule' );
 
-};
+});
 
 /* EXPORT */
 
