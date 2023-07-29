@@ -52,4 +52,11 @@ benchmark ({
   }
 });
 
+benchmark ({
+  name: 'json.parse',
+  fn: () => {
+    JSON.parse ( JSON_SAMPLE );
+  }
+});
+
 benchmark.summary ();

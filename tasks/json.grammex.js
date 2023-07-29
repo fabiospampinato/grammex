@@ -9,7 +9,7 @@ const LAZY_JSON = lazy ( () => JSON );
 
 const _ = /\s*/;
 
-const Null = 'null'
+const Null = 'null';
 const False = 'false';
 const True = 'true';
 const Number = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/;
