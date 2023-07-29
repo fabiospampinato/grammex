@@ -9,8 +9,9 @@ type ImplicitRule<T, U> = string | RegExp | Rule<T, U>[] | { [Key in string]: Ru
 type Rule<T, U> = ExplicitRule<T, U> | ImplicitRule<T, U>;
 
 type Cache<T> = Record<symbol, Record<number, { index: number, output?: T[] } | false>>;
-type State<T, U> = { cache: Cache<T>, context: U, input: string, index: number, indexMax: number, output: T[] };
+type Options = { memoization?: boolean };
+type State<T, U> = { cache: Cache<T>, context: U, input: string, index: number, indexMax: number, options: Options, output: T[] };
 
 /* EXPORT */
 
-export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Cache, State};
+export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Cache, Options, State};

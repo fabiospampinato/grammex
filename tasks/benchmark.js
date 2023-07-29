@@ -18,9 +18,16 @@ benchmark.config ({
 });
 
 benchmark ({
-  name: 'grammex.parse',
+  name: 'grammex.parse.memoized',
   fn: () => {
     parse ( JSON_SAMPLE, JSON_GRAMMEX, {} );
+  }
+});
+
+benchmark ({
+  name: 'grammex.parse.unmemoized',
+  fn: () => {
+    parse ( JSON_SAMPLE, JSON_GRAMMEX, {}, { memoization: false } );
   }
 });
 

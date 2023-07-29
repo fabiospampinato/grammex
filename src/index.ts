@@ -2,13 +2,13 @@
 /* IMPORT */
 
 import {isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
-import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, State} from './types';
+import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
 
 /* MAIN */
 
-const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U ): T[] => {
+const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Options = {} ): T[] => {
 
-  const state: State<T, U> = { cache: {}, context, input, index: 0, indexMax: 0, output: [] };
+  const state: State<T, U> = { cache: {}, context, input, index: 0, indexMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
 
   if ( matched && state.index === input.length ) {
@@ -284,6 +284,8 @@ const memoizable = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   return ( state: State<T, U> ): boolean => {
 
+    if ( state.options.memoization === false ) return erule ( state );
+
     const key = state.index;
     const cache = ( state.cache[symbol] ||= {} );
     const cached = cache[key];
@@ -381,4 +383,4 @@ export {repeat, optional, star, plus};
 export {and, or};
 export {not, equals};
 export {lazy};
-export type {PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, State};
+export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State};
