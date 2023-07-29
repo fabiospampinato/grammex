@@ -173,6 +173,8 @@ const and = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule
 
 };
 
+/* RULES - CHOICE */
+
 const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erules = rules.map ( resolve );
@@ -182,6 +184,35 @@ const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<
     return erules.some ( erule => erule ( state ) );
 
   }), handler ));
+
+};
+
+const jump = <T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+
+  const erules: Record<string, ExplicitRule<T>> = {};
+
+  for ( const char in rules ) {
+
+    erules[char] = resolve ( rules[char] );
+
+  }
+
+  return handleable ( backtrackable ( ( state: State<T> ): boolean => {
+
+    const char = state.input[state.index];
+    const erule = erules[char] || erules['default'];
+
+    if ( erule ) {
+
+      return erule ( state );
+
+    } else {
+
+      return false;
+
+    }
+
+  }), handler );
 
 };
 
@@ -322,7 +353,7 @@ const memoizable = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
           const output = state.output.slice ( lengthStart, lengthEnd );
 
-           cache.set ( indexStart, { index: indexEnd, output } );
+          cache.set ( indexStart, { index: indexEnd, output } );
 
         } else {
 
@@ -403,7 +434,8 @@ const resolve = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 export {parse, validate};
 export {match};
 export {repeat, optional, star, plus};
-export {and, or};
+export {and};
+export {or, jump};
 export {negative, positive};
 export {lazy};
 export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State};

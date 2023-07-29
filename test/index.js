@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {describe} from 'fava';
-import {parse, validate, match, repeat, optional, star, plus, and, or, negative, positive, lazy} from '../dist/index.js';
+import {parse, validate, match, repeat, optional, star, plus, and, or, jump, negative, positive, lazy} from '../dist/index.js';
 
 /* HELPERS */
 
@@ -558,6 +558,50 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [{ children: ['boo'] }] );
+
+    });
+
+  });
+
+  describe ( 'jump', it => {
+
+    it ( 'creates a rule that matches a rule looked up from the table', t => {
+
+      const foo = match ( 'foo', 'foo' );
+      const bar = match ( 'bar', 'bar' );
+      const table = jump ({ 'f': foo, 'b': bar });
+
+      const r1 = check ( 'foo', table );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['foo'] );
+
+      const r2 = check ( 'bar', table );
+
+      t.falsy ( r2.error );
+      t.deepEqual ( r2.output, ['bar'] );
+
+      const r3 = check ( 'baz', table );
+
+      t.truthy ( r3.error );
+      t.deepEqual ( r3.output, [] );
+
+      const r4 = check ( 'qux', table );
+
+      t.truthy ( r4.error );
+      t.deepEqual ( r4.output, [] );
+
+    });
+
+    it ( 'supports transforming output', t => {
+
+      const alt1 = match ( 'foo', 'foo' );
+      const alt2 = match ( 'bar', 'bar' );
+
+      const r1 = check ( 'foo', jump ( {'f': alt1, 'b': alt2}, tokens => ({ children: tokens }) ) );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, [{ children: ['foo'] }] );
 
     });
 
