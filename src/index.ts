@@ -23,11 +23,11 @@ const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Opt
 
 };
 
-const validate = <T, U> ( input: string, rule: Rule<T, U>, context: U ): boolean => {
+const validate = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Options = {} ): boolean => {
 
   try {
 
-    parse ( input, rule, context );
+    parse ( input, rule, context, options );
 
     return true;
 
