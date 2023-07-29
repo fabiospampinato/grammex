@@ -1,13 +1,14 @@
 
 /* IMPORT */
 
-import {jump, optional, star, lazy} from '../dist/index.js';
+import {match, jump, optional, star, lazy} from '../dist/index.js';
 
 /* MAIN */
 
 const LAZY_JSON = lazy ( () => JSON );
 
-const _ = /\s*/;
+// const _ = /\s*/;
+const _ = match ([ '\r', '\n', '\t', '\f', '\v', ' ' ]);
 
 const Null = 'null';
 const False = 'false';

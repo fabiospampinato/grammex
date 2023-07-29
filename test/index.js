@@ -268,6 +268,17 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'creates a rule based on a list of characters', t => {
+
+      const rule = match ( ['f', 'o'], _ => _ );
+
+      const r1 = check ( 'foo', [rule] );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['foo'] );
+
+    });
+
     it ( 'does not hang on regexes that do not consume input', t => {
 
       const rule = match ( /.?/, '0' );
@@ -287,6 +298,30 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['0'] );
+
+    });
+
+    it ( 'throws on invalid lists of characters contaning', t => {
+
+      try {
+
+        match ([ '' ]);
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Invalid character: ""' );
+
+      }
+
+      try {
+
+        match ([ 'foo' ]);
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Invalid character: "foo"' );
+
+      }
 
     });
 

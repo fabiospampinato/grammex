@@ -41,9 +41,59 @@ const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): bo
 
 /* RULES - PRIMIVITE */
 
-const match = <T> ( target: RegExp | string, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
+const match = <T> ( target: RegExp | string | string[], handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  return isString ( target ) ? string ( target, handler ) : regex ( target, handler );
+  return isArray ( target ) ? chars ( target, handler ) : isString ( target ) ? string ( target, handler ) : regex ( target, handler );
+
+};
+
+const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
+
+  const charCodes: Record<string, boolean> = {};
+
+  for ( const char of target ) {
+
+    if ( char.length !== 1 ) throw new Error ( `Invalid character: "${char}"` );
+
+    charCodes[char.charCodeAt ( 0 )] = true;
+
+  }
+
+  return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
+
+    const indexStart = state.index;
+    const input = state.input;
+
+    while ( state.index < input.length ) {
+
+      const charCode = input.charCodeAt ( state.index );
+
+      if ( !( charCode in charCodes ) ) break;
+
+      state.index += 1;
+
+    }
+
+    const indexEnd = state.index;
+
+    if ( indexEnd > indexStart ) {
+
+      if ( !isUndefined ( handler ) ) {
+
+        const target = state.input.slice ( indexStart, indexEnd );
+        const output = isFunction ( handler ) ? handler ( target, state.input, String ( indexStart ) ) : handler;
+
+        state.output.push ( output );
+
+      }
+
+      state.indexMax = Math.max ( state.indexMax, state.index );
+
+    }
+
+    return true;
+
+  };
 
 };
 
