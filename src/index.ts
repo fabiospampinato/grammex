@@ -55,7 +55,9 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
     if ( char.length !== 1 ) throw new Error ( `Invalid character: "${char}"` );
 
-    charCodes[char.charCodeAt ( 0 )] = true;
+    const charCode = char.charCodeAt ( 0 );
+
+    charCodes[charCode] = true;
 
   }
 
@@ -78,10 +80,10 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
     if ( indexEnd > indexStart ) {
 
-      if ( !isUndefined ( handler ) ) {
+      if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const target = state.input.slice ( indexStart, indexEnd );
-        const output = isFunction ( handler ) ? handler ( target, state.input, String ( indexStart ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( target, input, String ( indexStart ) ) : handler;
 
         state.output.push ( output );
 
@@ -138,7 +140,9 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    if ( state.input.startsWith ( target, state.index ) ) {
+    const isMatch = state.input.startsWith ( target, state.index );
+
+    if ( isMatch ) {
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
@@ -354,60 +358,40 @@ const handleable = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): Explicit
 
 };
 
-const memoizable = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
+const memoizable = (() => {
 
-  const erule = resolve ( rule );
-  const symbol = Symbol ();
+  let RULE_ID = 0; // This is faster than using symbols, for some reason
 
-  return ( state: State<T> ): boolean => {
+  return <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
-    if ( state.options.memoization === false ) return erule ( state );
+    const erule = resolve ( rule );
+    const ruleId = ( RULE_ID += 1 );
 
-    const indexStart = state.index;
-    const cache = ( state.cache[symbol] ||= new Map () );
-    const cached = cache.get ( indexStart );
+    return ( state: State<T> ): boolean => {
 
-    if ( cached === false ) {
+      if ( state.options.memoization === false ) return erule ( state );
 
-      return false;
+      const indexStart = state.index;
+      const cache = ( state.cache[ruleId] ||= new Map () );
+      const cached = cache.get ( indexStart );
 
-    } else if ( isNumber ( cached ) ) {
+      if ( cached === false ) {
 
-      state.index = cached;
+        return false;
 
-      return true;
+      } else if ( isNumber ( cached ) ) {
 
-    } else if ( cached ) {
+        state.index = cached;
 
-      state.index = cached.index;
+        return true;
 
-      if ( cached.output?.length ) {
+      } else if ( cached ) {
 
-        state.output.push ( ...cached.output );
+        state.index = cached.index;
 
-      }
+        if ( cached.output?.length ) {
 
-      return true;
-
-    } else {
-
-      const lengthStart = state.output.length;
-      const matched = erule ( state );
-
-      if ( matched ) {
-
-        const indexEnd = state.index;
-        const lengthEnd = state.output.length;
-
-        if ( lengthEnd > lengthStart ) {
-
-          const output = state.output.slice ( lengthStart, lengthEnd );
-
-          cache.set ( indexStart, { index: indexEnd, output } );
-
-        } else {
-
-          cache.set ( indexStart, indexEnd );
+          state.output.push ( ...cached.output );
 
         }
 
@@ -415,19 +399,45 @@ const memoizable = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
       } else {
 
-        cache.set ( indexStart, false );
+        const lengthStart = state.output.length;
+        const matched = erule ( state );
 
-        return false;
+        if ( matched ) {
+
+          const indexEnd = state.index;
+          const lengthEnd = state.output.length;
+
+          if ( lengthEnd > lengthStart ) {
+
+            const output = state.output.slice ( lengthStart, lengthEnd );
+
+            cache.set ( indexStart, { index: indexEnd, output } );
+
+          } else {
+
+            cache.set ( indexStart, indexEnd );
+
+          }
+
+          return true;
+
+        } else {
+
+          cache.set ( indexStart, false );
+
+          return false;
+
+        }
 
       }
 
-    }
+    };
 
   };
 
-};
+})();
 
-/* RULES - OTHERS */
+/* RULES - UTILITIES */
 
 const lazy = <T = any> ( getter: Function ): ExplicitRule<T> => { //TSC: It can't be typed properly due to circular references
 
@@ -451,9 +461,11 @@ const resolve = memoize (<T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
       return lazy ( rule );
 
-    }
+    } else {
 
-    return rule;
+      return rule;
+
+    }
 
   }
 
