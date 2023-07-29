@@ -220,6 +220,22 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not call handlers at all', t => {
+
+      const r1 = validate ( 'foo', match ( 'foo', () => t.fail () ) );
+
+      t.true ( r1 );
+
+      const r2 = validate ( 'foo', match ( /foo/, () => t.fail () ) );
+
+      t.true ( r2 );
+
+      const r3 = validate ( 'ooo', star ( 'o', () => t.fail () ) );
+
+      t.true ( r3 );
+
+    });
+
   });
 
   describe ( 'match', it => {
@@ -578,18 +594,6 @@ describe ( 'Grammex', it => {
 
     });
 
-    it.skip ( 'does not call handlers at all', t => {
-
-      const lookahead = match ( /bar/, () => t.fail () );
-      const rule = match ( /.*/, '1' );
-
-      const r1 = check ( 'barfoo', [negative ([ lookahead, lookahead ]), rule] );
-
-      t.falsy ( r1.error );
-      t.deepEqual ( r1.output, ['1'] );
-
-    });
-
   });
 
   describe ( 'positive', it => {
@@ -617,18 +621,6 @@ describe ( 'Grammex', it => {
       const rule = match ( /.*/, '1' );
 
       const r1 = check ( 'bar', [positive ( lookahead ), rule] );
-
-      t.falsy ( r1.error );
-      t.deepEqual ( r1.output, ['1'] );
-
-    });
-
-    it.skip ( 'does not call handlers at all', t => {
-
-      const lookahead = match ( /bar/, () => fail () );
-      const rule = match ( /.*/, '1' );
-
-      const r1 = check ( 'barfoo', [positive ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );

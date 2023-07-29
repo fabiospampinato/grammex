@@ -27,7 +27,7 @@ const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): bo
 
   try {
 
-    parse ( input, rule, options ); //TODO: add a silent/no-output special case maybe
+    parse ( input, rule, { ...options, silent: true } );
 
     return true;
 
@@ -61,7 +61,7 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
 
     if ( match ) {
 
-      if ( !isUndefined ( handler ) ) {
+      if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( state.index ) ) : handler;
 
@@ -90,7 +90,7 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
     if ( state.input.startsWith ( target, state.index ) ) {
 
-      if ( !isUndefined ( handler ) ) {
+      if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const output = isFunction ( handler ) ? handler ( target, state.input, String ( state.index ) ) : handler;
 
@@ -248,6 +248,8 @@ const handleable = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): Explicit
   if ( !handler ) return erule;
 
   return ( state: State<T> ): boolean => {
+
+    if ( state.options.silent ) return erule ( state );
 
     const length = state.output.length;
     const matched = erule ( state );

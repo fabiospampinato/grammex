@@ -9,7 +9,7 @@ type ImplicitRule<T> = string | RegExp | Rule<T>[] | { [Key in string]: Rule<T> 
 type Rule<T> = ExplicitRule<T> | ImplicitRule<T>;
 
 type Cache<T> = Record<symbol, Map<number, { index: number, output?: T[] } | number | false>>;
-type Options = { memoization?: boolean };
+type Options = { memoization?: boolean, silent?: boolean };
 type State<T> = { cache: Cache<T>, input: string, index: number, indexMax: number, options: Options, output: T[] };
 
 /* EXPORT */
