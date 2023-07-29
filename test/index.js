@@ -2,7 +2,7 @@
 /* IMPORT */
 
 import {describe} from 'fava';
-import {parse, validate, match, repeat, optional, star, plus, and, or, not, equals, lazy} from '../dist/index.js';
+import {parse, validate, match, repeat, optional, star, plus, and, or, negative, positive, lazy} from '../dist/index.js';
 
 /* HELPERS */
 
@@ -118,10 +118,27 @@ describe ( 'Grammex', it => {
 
     });
 
-    it ( 'supports a lazy rule', t => {
+    it ( 'supports a lazy rule, explicitly', t => {
 
       const rule = match ( /foo/, 'out' );
       const lazyRule = lazy ( () => rule );
+
+      const r1 = check ( 'foo', lazyRule );
+
+      t.falsy ( r1.error );
+      t.deepEqual ( r1.output, ['out'] );
+
+      const r2 = check ( 'bar', lazyRule );
+
+      t.truthy ( r2.error );
+      t.deepEqual ( r2.output, [] );
+
+    });
+
+    it ( 'supports a lazy rule, implicitly', t => {
+
+      const rule = match ( /foo/, 'out' );
+      const lazyRule = () => rule;
 
       const r1 = check ( 'foo', lazyRule );
 
@@ -146,22 +163,6 @@ describe ( 'Grammex', it => {
 
       t.truthy ( r2.error );
       t.deepEqual ( r2.output, [] );
-
-    });
-
-    it ( 'supports a context object, attached to the state', t => {
-
-      const rule = match ( /foo/, 'out' );
-
-      const ruleContext = state => {
-        state.output.push ( state.context.foo );
-        return rule ( state );
-      };
-
-      const r1 = check ( 'foo', ruleContext, { foo: 123 } );
-
-      t.falsy ( r1.error );
-      t.deepEqual ( r1.output, [123, 'out'] );
 
     });
 
@@ -546,19 +547,19 @@ describe ( 'Grammex', it => {
 
   });
 
-  describe ( 'not', it => {
+  describe ( 'negative', it => {
 
     it ( 'creates a negative lookahead rule', t => {
 
       const lookahead = /bar/;
       const rule = /.*/;
 
-      const r1 = check ( 'foo', [not ( lookahead ), rule] );
+      const r1 = check ( 'foo', [negative ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [] );
 
-      const r2 = check ( 'bar', [not ( lookahead ), rule] );
+      const r2 = check ( 'bar', [negative ( lookahead ), rule] );
 
       t.truthy ( r2.error );
       t.deepEqual ( r2.output, [] );
@@ -570,7 +571,7 @@ describe ( 'Grammex', it => {
       const lookahead = match ( /bar/, '0' );
       const rule = match ( /.*/, '1' );
 
-      const r1 = check ( 'foo', [not ( lookahead ), rule] );
+      const r1 = check ( 'foo', [negative ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
@@ -582,7 +583,7 @@ describe ( 'Grammex', it => {
       const lookahead = match ( /bar/, () => t.fail () );
       const rule = match ( /.*/, '1' );
 
-      const r1 = check ( 'barfoo', [not ([ lookahead, lookahead ]), rule] );
+      const r1 = check ( 'barfoo', [negative ([ lookahead, lookahead ]), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
@@ -591,19 +592,19 @@ describe ( 'Grammex', it => {
 
   });
 
-  describe ( 'equals', it => {
+  describe ( 'positive', it => {
 
     it ( 'creates a positive lookahead rule', t => {
 
       const lookahead = /bar/;
       const rule = /.*/;
 
-      const r1 = check ( 'bar', [equals ( lookahead ), rule] );
+      const r1 = check ( 'bar', [positive ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [] );
 
-      const r2 = check ( 'foo', [equals ( lookahead ), rule] );
+      const r2 = check ( 'foo', [positive ( lookahead ), rule] );
 
       t.truthy ( r2.error );
       t.deepEqual ( r2.output, [] );
@@ -615,7 +616,7 @@ describe ( 'Grammex', it => {
       const lookahead = match ( /bar/, '0' );
       const rule = match ( /.*/, '1' );
 
-      const r1 = check ( 'bar', [equals ( lookahead ), rule] );
+      const r1 = check ( 'bar', [positive ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
@@ -627,7 +628,7 @@ describe ( 'Grammex', it => {
       const lookahead = match ( /bar/, () => fail () );
       const rule = match ( /.*/, '1' );
 
-      const r1 = check ( 'barfoo', [equals ( lookahead ), rule] );
+      const r1 = check ( 'barfoo', [positive ( lookahead ), rule] );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );

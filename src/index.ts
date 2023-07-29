@@ -1,14 +1,14 @@
 
 /* IMPORT */
 
-import {isArray, isFunction, isObject, isRegExp, isString, isUndefined} from './utils';
+import {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined} from './utils';
 import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
 
 /* MAIN */
 
-const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Options = {} ): T[] => {
+const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] => {
 
-  const state: State<T, U> = { cache: {}, context, input, index: 0, indexMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
 
   if ( matched && state.index === input.length ) {
@@ -23,11 +23,11 @@ const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Opt
 
 };
 
-const validate = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: Options = {} ): boolean => {
+const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): boolean => {
 
   try {
 
-    parse ( input, rule, context, options );
+    parse ( input, rule, options ); //TODO: add a silent/no-output special case maybe
 
     return true;
 
@@ -41,56 +41,29 @@ const validate = <T, U> ( input: string, rule: Rule<T, U>, context: U, options: 
 
 /* RULES - PRIMIVITE */
 
-const match = <T, U> ( target: RegExp | string, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T, U> => {
+const match = <T> ( target: RegExp | string, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  if ( isString ( target ) ) { // Matching a string, slightly faster
+  return isString ( target ) ? string ( target, handler ) : regex ( target, handler );
 
-    return ( state: State<T, U> ): boolean => {
+};
 
-      const index = state.index;
-      const input = state.input;
+const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-      for ( let i = 0, l = target.length; i < l; i++ ) {
+  const source = target.source;
+  const flags = target.flags.replace ( /y|$/, 'y' );
+  const re = new RegExp ( source, flags );
 
-        if ( input[index + i] !== target[i] ) return false;
+  return memoizable (( state: State<T> ): boolean => {
 
-      }
+    re.lastIndex = state.index;
 
-      if ( !isUndefined ( handler ) ) {
+    const match = re.exec ( state.input );
 
-        const output = isFunction ( handler ) ? handler ( target, input, String ( index ) ) : handler;
-
-        state.output.push ( output );
-
-      }
-
-      state.index += target.length;
-      state.indexMax = Math.max ( state.indexMax, state.index );
-
-      return true;
-
-    };
-
-  } else { // Matching a regex, slightly slower
-
-    const source = target.source;
-    const flags = target.flags.replace ( /y|$/, 'y' );
-    const re = new RegExp ( source, flags );
-
-    return ( state: State<T, U> ): boolean => {
-
-      const index = state.index;
-      const input = state.input;
-
-      re.lastIndex = index;
-
-      const match = re.exec ( input );
-
-      if ( !match ) return false;
+    if ( match ) {
 
       if ( !isUndefined ( handler ) ) {
 
-        const output = isFunction ( handler ) ? handler ( ...match, input, String ( index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( state.index ) ) : handler;
 
         state.output.push ( output );
 
@@ -101,19 +74,52 @@ const match = <T, U> ( target: RegExp | string, handler?: PrimitiveHandler<T> | 
 
       return true;
 
-    };
+    } else {
 
-  }
+      return false;
+
+    }
+
+  });
+
+};
+
+const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
+
+  return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
+
+    if ( state.input.startsWith ( target, state.index ) ) {
+
+      if ( !isUndefined ( handler ) ) {
+
+        const output = isFunction ( handler ) ? handler ( target, state.input, String ( state.index ) ) : handler;
+
+        state.output.push ( output );
+
+      }
+
+      state.index += target.length;
+      state.indexMax = Math.max ( state.indexMax, state.index );
+
+      return true;
+
+    } else {
+
+      return false;
+
+    }
+
+  };
 
 };
 
 /* RULES - REPETITION */
 
-const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
 
-  return memoizable ( handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
+  return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
 
     let repetitions = 0;
 
@@ -125,7 +131,7 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: Co
 
       repetitions += 1;
 
-      if (  state.index === state.input.length ) break;
+      if ( state.index === state.input.length ) break; //TODO: Is this really working? comment it out
 
     }
 
@@ -135,19 +141,19 @@ const repeat = <T, U> ( rule: Rule<T, U>, min: number, max: number, handler?: Co
 
 };
 
-const optional = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const optional = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   return repeat ( rule, 0, 1, handler );
 
 };
 
-const star = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const star = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   return repeat ( rule, 0, Infinity, handler );
 
 };
 
-const plus = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const plus = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   return repeat ( rule, 1, Infinity, handler );
 
@@ -155,41 +161,25 @@ const plus = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): Explicit
 
 /* RULES - SEQUENCE */
 
-const and = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const and = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erules = rules.map ( resolve );
 
-  return memoizable ( handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
+  return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
 
-    for ( let i = 0, l = erules.length; i < l; i++ ) {
-
-      const matched = erules[i]( state );
-
-      if ( !matched ) return false;
-
-    }
-
-    return true;
+    return erules.every ( erule => erule ( state ) );
 
   }), handler ));
 
 };
 
-const or = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erules = rules.map ( resolve );
 
-  return memoizable ( handleable ( backtrackable ( ( state: State<T, U> ): boolean => {
+  return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
 
-    for ( let i = 0, l = erules.length; i < l; i++ ) {
-
-      const matched = erules[i]( state );
-
-      if ( matched ) return true;
-
-    }
-
-    return false;
+    return erules.some ( erule => erule ( state ) );
 
   }), handler ));
 
@@ -197,11 +187,11 @@ const or = <T, U> ( rules: Rule<T, U>[], handler?: CompoundHandler<T> ): Explici
 
 /* RULES - LOOKAHEAD */
 
-const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): ExplicitRule<T, U> => {
+const lookahead = <T> ( rule: Rule<T>, result: boolean ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
 
-  return backtrackable ( ( state: State<T, U> ): boolean => {
+  return backtrackable ( ( state: State<T> ): boolean => {
 
     return erule ( state ) === result;
 
@@ -209,13 +199,13 @@ const lookahead = <T, U> ( rule: Rule<T, U>, result: boolean ): ExplicitRule<T, 
 
 };
 
-const not = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+const negative = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
   return lookahead ( rule, false );
 
 };
 
-const equals = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+const positive = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
   return lookahead ( rule, true );
 
@@ -223,11 +213,11 @@ const equals = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
 /* RULES - DECORATORS */
 
-const backtrackable = <T, U> ( rule: Rule<T, U>, force: boolean = false ): ExplicitRule<T, U> => {
+const backtrackable = <T> ( rule: Rule<T>, force: boolean = false ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
 
-  return ( state: State<T, U> ): boolean => {
+  return ( state: State<T> ): boolean => {
 
     const index = state.index;
     const length = state.output.length;
@@ -237,7 +227,7 @@ const backtrackable = <T, U> ( rule: Rule<T, U>, force: boolean = false ): Expli
 
       state.index = index;
 
-      if ( state.output.length !== length ) { // This can be surprisingly slow
+      if ( state.output.length !== length ) { // This can be surprisingly slow otherwise
 
         state.output.length = length;
 
@@ -251,73 +241,98 @@ const backtrackable = <T, U> ( rule: Rule<T, U>, force: boolean = false ): Expli
 
 };
 
-const handleable = <T, U> ( rule: Rule<T, U>, handler?: CompoundHandler<T> ): ExplicitRule<T, U> => {
+const handleable = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
 
-  return ( state: State<T, U> ): boolean => {
+  if ( !handler ) return erule;
+
+  return ( state: State<T> ): boolean => {
 
     const length = state.output.length;
     const matched = erule ( state );
 
-    if ( matched && handler ) {
+    if ( matched ) {
 
-      const tokens = state.output.splice ( length, Infinity );
-      const output = handler ( tokens );
+      const outputs = state.output.splice ( length, Infinity );
+      const output = handler ( outputs );
 
       state.output.push ( output );
-
-    }
-
-    return matched;
-
-  };
-
-};
-
-const memoizable = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
-
-  // return rule;
-
-  const erule = resolve ( rule );
-  const symbol = Symbol ();
-
-  return ( state: State<T, U> ): boolean => {
-
-    if ( state.options.memoization === false ) return erule ( state );
-
-    const key = state.index;
-    const cache = ( state.cache[symbol] ||= {} );
-    const cached = cache[key];
-
-    if ( cached === false ) {
-
-      return false;
-
-    } else if ( cached ) {
-
-      state.index = cached.index;
-      state.output.push ( ...cached.output );
 
       return true;
 
     } else {
 
-      const length = state.output.length;
+      return false;
+
+    }
+
+  };
+
+};
+
+const memoizable = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
+
+  const erule = resolve ( rule );
+  const symbol = Symbol ();
+
+  return ( state: State<T> ): boolean => {
+
+    if ( state.options.memoization === false ) return erule ( state );
+
+    const indexStart = state.index;
+    const cache = ( state.cache[symbol] ||= new Map () );
+    const cached = cache.get ( indexStart );
+
+    if ( cached === false ) {
+
+      return false;
+
+    } else if ( isNumber ( cached ) ) {
+
+      state.index = cached;
+
+      return true;
+
+    } else if ( cached ) {
+
+      state.index = cached.index;
+
+      if ( cached.output?.length ) {
+
+        state.output.push ( ...cached.output );
+
+      }
+
+      return true;
+
+    } else {
+
+      const lengthStart = state.output.length;
       const matched = erule ( state );
 
       if ( matched ) {
 
-        const index = state.index;
-        const output = state.output.slice ( length, Infinity );
+        const indexEnd = state.index;
+        const lengthEnd = state.output.length;
 
-        cache[key] = { index, output };
+        if ( lengthEnd > lengthStart ) {
+
+          const output = state.output.slice ( lengthStart, lengthEnd );
+
+           cache.set ( indexStart, { index: indexEnd, output } );
+
+        } else {
+
+          cache.set ( indexStart, indexEnd );
+
+        }
 
         return true;
 
       } else {
 
-        cache[key] = false;
+        cache.set ( indexStart, false );
 
         return false;
 
@@ -331,11 +346,11 @@ const memoizable = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
 /* RULES - OTHERS */
 
-const lazy = <T = any, U = any> ( getter: Function ): ExplicitRule<T, U> => { //TSC: It can't be typed properly due to circular references
+const lazy = <T = any> ( getter: Function ): ExplicitRule<T> => { //TSC: It can't be typed properly due to circular references
 
-  let erule: ExplicitRule<T, U>;
+  let erule: ExplicitRule<T>;
 
-  return ( state: State<T, U> ): boolean => {
+  return ( state: State<T> ): boolean => {
 
     erule ||= resolve ( getter () );
 
@@ -345,9 +360,15 @@ const lazy = <T = any, U = any> ( getter: Function ): ExplicitRule<T, U> => { //
 
 };
 
-const resolve = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
+const resolve = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
   if ( isFunction ( rule ) ) {
+
+    if ( isFunctionNullary ( rule ) ) {
+
+      return lazy ( rule );
+
+    }
 
     return rule;
 
@@ -355,7 +376,7 @@ const resolve = <T, U> ( rule: Rule<T, U> ): ExplicitRule<T, U> => {
 
   if ( isString ( rule ) || isRegExp ( rule ) ) {
 
-    return match<T, U> ( rule );
+    return match<T> ( rule );
 
   }
 
@@ -381,6 +402,6 @@ export {parse, validate};
 export {match};
 export {repeat, optional, star, plus};
 export {and, or};
-export {not, equals};
+export {negative, positive};
 export {lazy};
 export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State};
