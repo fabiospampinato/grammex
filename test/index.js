@@ -6,9 +6,9 @@ import {parse, validate, match, repeat, optional, star, plus, and, or, not, equa
 
 /* HELPERS */
 
-const check = ( input, rule, options ) => {
+const check = ( input, rule, context ) => {
   try {
-    const output = parse ( input, rule, options );
+    const output = parse ( input, rule, context );
     const error = undefined;
     return {output, error};
   } catch ( error ) {
@@ -149,16 +149,16 @@ describe ( 'Grammex', it => {
 
     });
 
-    it ( 'supports an options object, attached to the state', t => {
+    it ( 'supports a context object, attached to the state', t => {
 
       const rule = match ( /foo/, 'out' );
 
-      const ruleOptions = state => {
-        state.output.push ( state.options.foo );
+      const ruleContext = state => {
+        state.output.push ( state.context.foo );
         return rule ( state );
       };
 
-      const r1 = check ( 'foo', ruleOptions, { foo: 123 } );
+      const r1 = check ( 'foo', ruleContext, { foo: 123 } );
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, [123, 'out'] );

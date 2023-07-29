@@ -6,9 +6,9 @@ import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule
 
 /* MAIN */
 
-const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
+const parse = <T, U> ( input: string, rule: Rule<T, U>, context: U ): T[] => {
 
-  const state: State<T, U> = { cache: {}, options, input, index: 0, indexMax: 0, output: [] };
+  const state: State<T, U> = { cache: {}, context, input, index: 0, indexMax: 0, output: [] };
   const matched = resolve ( rule )( state );
 
   if ( matched && state.index === input.length ) {
@@ -23,11 +23,11 @@ const parse = <T, U> ( input: string, rule: Rule<T, U>, options: U ): T[] => {
 
 };
 
-const validate = <T, U> ( input: string, rule: Rule<T, U>, options: U ): boolean => {
+const validate = <T, U> ( input: string, rule: Rule<T, U>, context: U ): boolean => {
 
   try {
 
-    parse ( input, rule, options );
+    parse ( input, rule, context );
 
     return true;
 
