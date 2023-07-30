@@ -13,23 +13,24 @@ The following functions for executing rules are provided:
 
 The following functions for creating a primitive rule are provided:
 
-| Function          | Description                                                                                                  |
-| ----------------- | ------------------------------------------------------------------------------------------------------------ |
-| `match(regex,fn)` | Creates a new rule that tries to match the input string at the current position with the given regex/string. |
+| Function           | Description                                                                                                             |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
+| `match(target,cb)` | Creates a new rule that tries to match the input string at the current position with the given regex/string/characters. |
 
 The following higher-order functions for creating a rule out of other rules are provided:
 
-| Function               | Description                                                                                                            |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `repeat(rule,min,max)` | Creates a rule that tries to match the given rule at least `min` times and at most `max` times.                        |
-| `optional(rule)`       | Creates a rule that tries to match the given rule zero or one times.                                                   |
-| `star(rule)`           | Creates a rule that tries to match the given rule zero or more times.                                                  |
-| `plus(rule)`           | Creates a rule that tries to match the given rule one or more times.                                                   |
-| `and(rule[])`          | Creates a rule that tries to match all the given rules in sequence, one after the other.                               |
-| `or(rule[])`           | Creates a rule that tries to match any of the given rules, stopping at the first matching one.                         |
-| `not(rule)`            | Creates a rule that tries to not match the given rule. This rule doesn't consume any input, it's a negative lookahead. |
-| `equals(rule)`         | Creates a rule that tries to match the given rule. This rule doesn't consume any input, it's a positive lookahead.     |
-| `lazy(()=>rule)`       | Creates a rule out of a getter for another rule. This is necessary when dealing with circular references.              |
+| Function                  | Description                                                                                                                             |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `repeat(rule,min,max,cb)` | Creates a rule that tries to match the given rule at least `min` times and at most `max` times.                                         |
+| `optional(rule,cb)`       | Creates a rule that tries to match the given rule zero or one times.                                                                    |
+| `star(rule,cb)`           | Creates a rule that tries to match the given rule zero or more times.                                                                   |
+| `plus(rule,cb)`           | Creates a rule that tries to match the given rule one or more times.                                                                    |
+| `and(rule[],cb)`          | Creates a rule that tries to match all the given rules in sequence, one after the other.                                                |
+| `or(rule[],cb)`           | Creates a rule that tries to match any of the given rules, stopping at the first matching one.                                          |
+| `jump(rule{}, cb)`        | Creates a rule that tries to match any of the given rules, but trying only one of the options, chosen by looking at the next character. |
+| `negative(rule)`          | Creates a rule that tries to not match the given rule. This rule doesn't consume any input, it's a negative lookahead.                  |
+| `positive(rule)`          | Creates a rule that tries to match the given rule. This rule doesn't consume any input, it's a positive lookahead.                      |
+| `lazy(()=>rule)`          | Creates a rule out of a getter for another rule. This is necessary when dealing with circular references.                               |
 
 The following shorthands for creating rules are provided:
 
@@ -39,10 +40,13 @@ The following shorthands for creating rules are provided:
 | `/foo/`         | A regex is automatically interpreted as the primitive rule using the provided regex.                                    |
 | `['foo',/bar/]` | An array of strings and regexes is automatically interpreted as wrapped in an `and` rule.                               |
 | `{Foo,Bar}`     | A plain object with strings and regexes as values is automatically interpreted as those values wrapped in an `or` rule. |
+| `()=>Foo`       | An argumentless function is automatically interpreted as the same function wrapped in a `lazy`rule.                     |
 
 Basically you should create some primitive rules with `match`, combine those into higher-level rules, decide which one of those will be your "root" rule, and use that to `parse` or `validate` an input string.
 
-If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `fn` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
+If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `cb` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
+
+All provided rules are "greedy", to conform with PEG grammars, removing ambiguities and improving performance significantly. Rules are also internally memoized, to ensure fast parsing times in edge cases.
 
 ## Install
 
