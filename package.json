@@ -2,7 +2,7 @@
   "name": "grammex",
   "repository": "github:fabiospampinato/grammex",
   "description": "A tiny, PEG-like system for building language grammars with regexes.",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
