@@ -440,6 +440,24 @@ const memoizable = (() => {
 
 /* RULES - UTILITIES */
 
+const grammar = <T, U> ( fn: ( operators: { match: typeof match<T>, repeat: typeof repeat<T>, optional: typeof optional<T>, star: typeof star<T>, plus: typeof plus<T>, and: typeof and<T>, or: typeof or<T>, jump: typeof jump<T>, negative: typeof negative<T>, positive: typeof positive<T>, lazy: typeof lazy<T> } ) => U ): U => { // Useful for fixing the "T" type across all operators
+
+  return fn ({
+    match: match<T>,
+    repeat: repeat<T>,
+    optional: optional<T>,
+    star: star<T>,
+    plus: plus<T>,
+    and: and<T>,
+    or: or<T>,
+    jump: jump<T>,
+    negative: negative<T>,
+    positive: positive<T>,
+    lazy: lazy<T>
+  });
+
+};
+
 const lazy = <T = any> ( getter: Function ): ExplicitRule<T> => { //TSC: It can't be typed properly due to circular references
 
   let erule: ExplicitRule<T>;
@@ -500,5 +518,5 @@ export {repeat, optional, star, plus};
 export {and};
 export {or, jump};
 export {negative, positive};
-export {lazy};
+export {grammar, lazy};
 export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State};
