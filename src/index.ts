@@ -27,7 +27,7 @@ const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): bo
 
   try {
 
-    parse ( input, rule, { ...options, silent: true } );
+    parse ( input, rule, options );
 
     return true;
 

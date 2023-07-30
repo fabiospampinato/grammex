@@ -220,21 +220,23 @@ describe ( 'Grammex', it => {
 
     });
 
-    it ( 'does not call handlers at all', t => {
+    it ( 'does call handlers at all, to allow them to throw', t => {
 
-      const r1 = validate ( 'foo', match ( 'foo', () => t.fail () ) );
+      t.plan ( 8 );
+
+      const r1 = validate ( 'foo', match ( 'foo', () => t.pass () ) );
 
       t.true ( r1 );
 
-      const r2 = validate ( 'foo', match ( /foo/, () => t.fail () ) );
+      const r2 = validate ( 'foo', match ( /foo/, () => t.pass () ) );
 
       t.true ( r2 );
 
-      const r3 = validate ( 'ooo', star ( 'o', () => t.fail () ) );
+      const r3 = validate ( 'ooo', star ( 'o', () => t.pass () ) );
 
       t.true ( r3 );
 
-      const r4 = validate ( 'ooo', match ( ['o'], () => t.fail () ) );
+      const r4 = validate ( 'ooo', match ( ['o'], () => t.pass () ) );
 
       t.true ( r4 );
 
