@@ -234,6 +234,10 @@ describe ( 'Grammex', it => {
 
       t.true ( r3 );
 
+      const r4 = validate ( 'ooo', match ( ['o'], () => t.fail () ) );
+
+      t.true ( r4 );
+
     });
 
   });
@@ -370,6 +374,11 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['0'] );
+
+      const r2 = check ( 'ooo', and ([ repeat ( rule, 1, 5 ), 'ooo' ]) );
+
+      t.falsy ( r2.error );
+      t.deepEqual ( r2.output, ['0'] );
 
     });
 

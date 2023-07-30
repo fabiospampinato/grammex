@@ -179,13 +179,14 @@ const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: Compound
 
     while ( repetitions < max ) {
 
+      const index = state.index;
       const matched = erule ( state );
 
       if ( !matched ) break;
 
       repetitions += 1;
 
-      if ( state.index === state.input.length ) break; //TODO: Is this really working? comment it out
+      if ( state.index === index ) break;
 
     }
 
