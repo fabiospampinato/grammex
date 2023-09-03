@@ -85,7 +85,11 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
         const target = state.input.slice ( indexStart, indexEnd );
         const output = isFunction ( handler ) ? handler ( target, input, String ( indexStart ) ) : handler;
 
-        state.output.push ( output );
+        if ( !isUndefined ( output ) ) {
+
+          state.output.push ( output );
+
+        }
 
       }
 
@@ -117,7 +121,11 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
 
         const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( state.index ) ) : handler;
 
-        state.output.push ( output );
+        if ( !isUndefined ( output ) ) {
+
+          state.output.push ( output );
+
+        }
 
       }
 
@@ -148,7 +156,11 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
         const output = isFunction ( handler ) ? handler ( target, state.input, String ( state.index ) ) : handler;
 
-        state.output.push ( output );
+        if ( !isUndefined ( output ) ) {
+
+          state.output.push ( output );
+
+        }
 
       }
 
@@ -345,7 +357,11 @@ const handleable = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): Explicit
       const outputs = state.output.splice ( length, Infinity );
       const output = handler ( outputs );
 
-      state.output.push ( output );
+      if ( !isUndefined ( output ) ) {
+
+        state.output.push ( output );
+
+      }
 
       return true;
 

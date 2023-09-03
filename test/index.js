@@ -307,6 +307,26 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'supports not returning any output from the handler', t => {
+
+      const rule1 = match ( /foo/, () => {} );
+      const rule2 = match ( 'foo', () => {} );
+      const rule3 = match ( ['f', 'o'], () => {} );
+
+      const result1 = check ( 'foo', rule1 );
+      const result2 = check ( 'foo', rule2 );
+      const result3 = check ( 'foo', rule3 );
+
+      t.falsy ( result1.error );
+      t.falsy ( result2.error );
+      t.falsy ( result3.error );
+
+      t.deepEqual ( result1.output, [] );
+      t.deepEqual ( result2.output, [] );
+      t.deepEqual ( result3.output, [] );
+
+    });
+
     it ( 'throws on invalid lists of characters contaning', t => {
 
       try {
