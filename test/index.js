@@ -671,6 +671,30 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'throws on invalid jump characters', t => {
+
+      try {
+
+        jump ({ '': match ( 'foo' ) });
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Invalid jump character: ""' );
+
+      }
+
+      try {
+
+        jump ({ 'foo': match ( 'foo' ) });
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Invalid jump character: "foo"' );
+
+      }
+
+    });
+
   });
 
   describe ( 'negative', it => {

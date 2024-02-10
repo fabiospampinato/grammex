@@ -272,6 +272,8 @@ const jump = <T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T> 
 
   for ( const char in rules ) {
 
+    if ( char.length !== 1 && char !== 'default' ) throw new Error ( `Invalid jump character: "${char}"` );
+
     erules[char] = resolve ( rules[char] );
 
   }
