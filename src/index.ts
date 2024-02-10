@@ -234,7 +234,13 @@ const and = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule
 
   return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
 
-    return erules.every ( erule => erule ( state ) );
+    for ( let i = 0, l = erules.length; i < l; i++ ) {
+
+      if ( !erules[i]( state ) ) return false;
+
+    }
+
+    return true;
 
   }), handler ));
 
@@ -248,7 +254,13 @@ const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<
 
   return memoizable ( handleable ( ( state: State<T> ): boolean => {
 
-    return erules.some ( erule => erule ( state ) );
+    for ( let i = 0, l = erules.length; i < l; i++ ) {
+
+      if ( erules[i]( state ) ) return true;
+
+    }
+
+    return false;
 
   }, handler ));
 
