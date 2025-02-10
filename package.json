@@ -2,6 +2,7 @@
   "name": "grammex",
   "repository": "github:fabiospampinato/grammex",
   "description": "A tiny, PEG-like system for building language grammars with regexes.",
+  "license": "MIT",
   "version": "3.1.3",
   "type": "module",
   "main": "dist/index.js",
@@ -27,9 +28,9 @@
     "grammar"
   ],
   "devDependencies": {
-    "benchloop": "^2.1.0",
-    "fava": "^0.2.0",
-    "tsex": "^3.0.1",
-    "typescript": "^5.1.6"
+    "benchloop": "^2.1.1",
+    "fava": "^0.3.4",
+    "tsex": "^4.0.2",
+    "typescript": "^5.7.3"
   }
 }
