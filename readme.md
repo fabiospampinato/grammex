@@ -46,12 +46,12 @@ Basically you should create some primitive rules with `match`, combine those int
 
 If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `cb` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
 
-All provided rules are "greedy", to conform with PEG grammars, removing ambiguities and improving performance significantly. Rules are also internally memoized, to ensure fast parsing times in edge cases.
+All provided rules are "greedy", to conform with PEG grammars, removing ambiguities and improving performance significantly. Rules are also internally memoized, to ensure fast parsing times in edge cases, but you can turn that off for extra speed if your grammar is not too ambiguous.
 
 ## Install
 
 ```sh
-npm install --save grammex
+npm install grammex
 ```
 
 ## Usage
