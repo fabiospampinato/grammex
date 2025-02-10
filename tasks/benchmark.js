@@ -4,8 +4,7 @@
 import benchmark from 'benchloop';
 import fs from 'node:fs';
 import {parse, validate} from '../dist/index.js';
-import JSON_GRAMMEX from './json.grammex.js';
-import JSON_HERA from './json.hera.js';
+import JSON_GRAMMAR from './grammar.js';
 
 /* HELPERS */
 
@@ -20,35 +19,28 @@ benchmark.config ({
 benchmark ({
   name: 'grammex.parse.memoized',
   fn: () => {
-    parse ( JSON_SAMPLE, JSON_GRAMMEX );
+    parse ( JSON_SAMPLE, JSON_GRAMMAR );
   }
 });
 
 benchmark ({
   name: 'grammex.parse.unmemoized',
   fn: () => {
-    parse ( JSON_SAMPLE, JSON_GRAMMEX, { memoization: false } );
+    parse ( JSON_SAMPLE, JSON_GRAMMAR, { memoization: false } );
   }
 });
 
 benchmark ({
   name: 'grammex.validate.memoized',
   fn: () => {
-    validate ( JSON_SAMPLE, JSON_GRAMMEX );
+    validate ( JSON_SAMPLE, JSON_GRAMMAR );
   }
 });
 
 benchmark ({
   name: 'grammex.validate.unmemoized',
   fn: () => {
-    validate ( JSON_SAMPLE, JSON_GRAMMEX, { memoization: false } );
-  }
-});
-
-benchmark ({
-  name: 'hera.parse',
-  fn: () => {
-    JSON_HERA.parse ( JSON_SAMPLE );
+    validate ( JSON_SAMPLE, JSON_GRAMMAR, { memoization: false } );
   }
 });
 
