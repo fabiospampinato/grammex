@@ -57,7 +57,7 @@ const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
 
     const cached = cache.get ( arg );
 
-    if ( cached ) return cached;
+    if ( cached !== undefined ) return cached;
 
     const value = fn ( arg );
 
