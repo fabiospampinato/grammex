@@ -42,6 +42,12 @@ The following shorthands for creating rules are provided:
 | `{Foo,Bar}`     | A plain object with strings and regexes as values is automatically interpreted as those values wrapped in an `or` rule. |
 | `()=>Foo`       | An argumentless function is automatically interpreted as the same function wrapped in a `lazy`rule.                     |
 
+The following utility functions are provided:
+
+| Utility          | Description                                                                                                                            |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `grammar<T>(cb)` | Creates a new set of primitive and higher-order functions for making rules, with a fixed token type, and passes them to your callback. |
+
 Basically you should create some primitive rules with `match`, combine those into higher-level rules, decide which one of those will be your "root" rule, and use that to `parse` or `validate` an input string.
 
 If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `cb` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
