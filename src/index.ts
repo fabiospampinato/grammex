@@ -63,22 +63,25 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    const indexStart = state.index;
     const input = state.input;
 
-    while ( state.index < input.length ) {
+    let indexStart = state.index;
+    let indexEnd = indexStart;
 
-      const charCode = input.charCodeAt ( state.index );
+    while ( indexEnd < input.length ) {
+
+      const charCode = input.charCodeAt ( indexEnd );
 
       if ( !( charCode in charCodes ) ) break;
 
-      state.index += 1;
+      indexEnd += 1;
 
     }
 
-    const indexEnd = state.index;
-
     if ( indexEnd > indexStart ) {
+
+      state.index = indexEnd;
+      state.indexMax = Math.max ( state.indexMax, state.index );
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
@@ -92,8 +95,6 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
         }
 
       }
-
-      state.indexMax = Math.max ( state.indexMax, state.index );
 
     }
 
