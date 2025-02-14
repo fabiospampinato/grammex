@@ -8,8 +8,9 @@ import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule
 
 const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] => {
 
-  const state: State<T> = { cache: {}, input, index: 0, indexMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
+  const indexMax = Math.max ( state.index, state.indexBacktrackMax );
 
   if ( matched && state.index === input.length ) {
 
@@ -17,7 +18,7 @@ const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] =
 
   } else {
 
-    throw new Error ( `Failed to parse at index ${state.indexMax}` );
+    throw new Error ( `Failed to parse at index ${indexMax}` );
 
   }
 
@@ -80,9 +81,6 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
     if ( indexEnd > indexStart ) {
 
-      state.index = indexEnd;
-      state.indexMax = Math.max ( state.indexMax, state.index );
-
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const target = state.input.slice ( indexStart, indexEnd );
@@ -95,6 +93,8 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
         }
 
       }
+
+      state.index = indexEnd;
 
     }
 
@@ -131,7 +131,6 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
       }
 
       state.index += match[0].length;
-      state.indexMax = Math.max ( state.indexMax, state.index );
 
       return true;
 
@@ -166,7 +165,6 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
       }
 
       state.index += target.length;
-      state.indexMax = Math.max ( state.indexMax, state.index );
 
       return true;
 
@@ -338,6 +336,7 @@ const backtrackable = <T> ( rule: Rule<T>, force: boolean = false ): ExplicitRul
 
     if ( !matched || force ) {
 
+      state.indexBacktrackMax = Math.max ( state.indexBacktrackMax, state.index );
       state.index = index;
 
       if ( state.output.length !== length ) { // This can be surprisingly slow otherwise

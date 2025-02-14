@@ -10,7 +10,7 @@ type Rule<T> = ExplicitRule<T> | ImplicitRule<T>;
 
 type Cache<T> = Record<number, Map<number, { index: number, output?: T[] } | number | false>>;
 type Options = { memoization?: boolean, silent?: boolean };
-type State<T> = { cache: Cache<T>, input: string, index: number, indexMax: number, options: Options, output: T[] };
+type State<T> = { cache: Cache<T>, input: string, index: number, indexBacktrackMax: number, options: Options, output: T[] };
 
 /* EXPORT */
 
