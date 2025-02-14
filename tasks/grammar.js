@@ -8,11 +8,12 @@ import {match, jump, optional, star, lazy} from '../dist/index.js';
 const LAZY_JSON = lazy ( () => JSON );
 
 // const _ = /\s*/;
-const _ = match ([ '\r', '\n', '\t', '\f', '\v', ' ' ]);
+// const _ = /[ \n\r\t\f\v]*/;
+const _ = match ([ ' ', '\n', '\r', '\t', '\f', '\v' ]);
 
-const Null = 'null';
-const False = 'false';
-const True = 'true';
+const Null = /null/;
+const False = /false/;
+const True = /true/;
 const Number = /-?(?:0|[1-9][0-9]*)(?:\.[0-9]+)?(?:[eE][-+]?[0-9]+)?/;
 const String = /"(?:\\.|\\u[0-9A-Fa-f]{4}|[^"\r\n])*"/;
 
