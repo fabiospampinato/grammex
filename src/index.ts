@@ -334,9 +334,14 @@ const backtrackable = <T> ( rule: Rule<T>, force: boolean = false ): ExplicitRul
     const length = state.output.length;
     const matched = erule ( state );
 
-    if ( !matched || force ) {
+    if ( !matched && !force ) {
 
       state.indexBacktrackMax = Math.max ( state.indexBacktrackMax, state.index );
+
+    }
+
+    if ( !matched || force ) {
+
       state.index = index;
 
       if ( state.output.length !== length ) { // This can be surprisingly slow otherwise

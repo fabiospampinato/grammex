@@ -728,6 +728,17 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not contribute to the maximum parsed index', t => {
+
+      const lookahead = match ( /bbb/ );
+      const rule = match ( /aaa/ );
+
+      const r1 = check ( 'aaaccc', [rule, negative ( lookahead ), rule] );
+
+      t.is ( r1.error.message, 'Failed to parse at index 3' );
+
+    });
+
   });
 
   describe ( 'positive', it => {
@@ -758,6 +769,17 @@ describe ( 'Grammex', it => {
 
       t.falsy ( r1.error );
       t.deepEqual ( r1.output, ['1'] );
+
+    });
+
+    it ( 'does not contribute to the maximum parsed index', t => {
+
+      const lookahead = match ( /bbb/ );
+      const rule = match ( /aaa/ );
+
+      const r1 = check ( 'aaabbb', [rule, positive ( lookahead ), rule] );
+
+      t.is ( r1.error.message, 'Failed to parse at index 3' );
 
     });
 
