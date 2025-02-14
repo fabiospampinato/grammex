@@ -37,6 +37,24 @@ const isRegExp = ( value: unknown ): value is RegExp => {
 
 };
 
+const isRegExpCapturing = ( re: RegExp ): boolean => { //TODO: Implement this perfectly instead, by parsing the regex
+
+  return re.source.includes ( '(' );
+
+};
+
+const isRegExpStatic = (() => { //TODO: Implement this perfectly instead, by parsing the regex
+
+  const sourceRe = /^[a-zA-Z0-9_-]+$/;
+
+  return ( re: RegExp ): boolean => {
+
+    return sourceRe.test ( re.source ) && !re.flags.includes ( 'i' );
+
+  };
+
+})();
+
 const isString = ( value: unknown ): value is string => {
 
   return typeof value === 'string';
@@ -71,4 +89,4 @@ const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
 
 /* EXPORT */
 
-export {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined, memoize};
+export {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize};

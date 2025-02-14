@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isString, isUndefined, memoize} from './utils';
+import {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize} from './utils';
 import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
 
 /* MAIN */
@@ -106,9 +106,31 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
 const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  const source = target.source;
-  const flags = target.flags.replace ( /y|$/, 'y' );
-  const re = new RegExp ( source, flags );
+  if ( isRegExpStatic ( target ) ) {
+
+    return string ( target.source, handler );
+
+  } else {
+
+    const source = target.source;
+    const flags = target.flags.replace ( /y|$/, 'y' );
+    const re = new RegExp ( source, flags );
+
+    if ( isRegExpCapturing ( target ) ) {
+
+      return regexCapturing ( re, handler );
+
+    } else {
+
+      return regexNonCapturing ( re, handler );
+
+    }
+
+  }
+
+};
+
+const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
   return memoizable (( state: State<T> ): boolean => {
 
@@ -131,6 +153,42 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
       }
 
       state.index += match[0].length;
+
+      return true;
+
+    } else {
+
+      return false;
+
+    }
+
+  });
+
+};
+
+const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
+
+  return memoizable (( state: State<T> ): boolean => {
+
+    re.lastIndex = state.index;
+
+    const matched = re.test ( state.input );
+
+    if ( matched ) {
+
+      if ( !isUndefined ( handler ) && !state.options.silent ) {
+
+        const output = isFunction ( handler ) ? handler ( state.input.slice ( state.index, re.lastIndex ), state.input, String ( state.index ) ) : handler;
+
+        if ( !isUndefined ( output ) ) {
+
+          state.output.push ( output );
+
+        }
+
+      }
+
+      state.index = re.lastIndex;
 
       return true;
 
