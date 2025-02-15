@@ -865,4 +865,37 @@ describe ( 'Grammex', it => {
 
   });
 
+  it ( 'supports memoizing rules', t => {
+
+    let count = 0;
+
+    const a = match ( 'a', () => { count += 1 } );
+    const b = match ( 'b', () => { count += 1 } );
+    const c = match ( 'c', () => { count += 1 } );
+    const d = match ( 'd', () => { count += 1 } );
+
+    const ab  = [a, optional ( () => ab ), b];
+    const rule  = or ([ [ab, c], [ab, d] ]);
+
+    const inputWithC = `${'a'.repeat ( 100 )}${'b'.repeat ( 100 )}c`;
+    const inputWithD = `${'a'.repeat ( 100 )}${'b'.repeat ( 100 )}d`;
+
+    count = 0;
+    parse ( inputWithC, rule, { memoization: true } );
+    t.is ( count, 201 );
+
+    count = 0;
+    parse ( inputWithC, rule, { memoization: false } );
+    t.is ( count, 201 );
+
+    count = 0;
+    parse ( inputWithD, rule, { memoization: true } );
+    t.is ( count, 201 );
+
+    count = 0;
+    parse ( inputWithD, rule, { memoization: false } );
+    t.is ( count, 401 );
+
+  });
+
 });
