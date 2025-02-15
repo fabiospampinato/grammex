@@ -48,11 +48,18 @@ The following utility functions are provided:
 | ---------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
 | `grammar<T>(cb)` | Creates a new set of primitive and higher-order functions for making rules, with a fixed token type, and passes them to your callback. |
 
+The following options are supported:
+
+| Option        | Description                                                                                                                                                                                     |
+| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `memoization` | `true` by default. If enabled this lowers the time complexity of the parser, but it can have a negative impact on performance for grammars and inputs with not a lot of backtracking happening. |
+| `silent`      | `false` by default. If enabled then rules callbacks are not called, this enables faster validation if you have side-effects-free callbacks.                                                     |
+
 Basically you should create some primitive rules with `match`, combine those into higher-level rules, decide which one of those will be your "root" rule, and use that to `parse` or `validate` an input string.
 
 If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `cb` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
 
-All provided rules are "greedy", to conform with PEG grammars, removing ambiguities and improving performance significantly. Rules are also internally memoized, to ensure fast parsing times in edge cases, but you can turn that off for extra speed if your grammar is not too ambiguous.
+All provided rules are "greedy", to conform with PEG grammars, removing ambiguities and improving performance significantly. Rules are also internally memoized by default, to ensure fast parsing times in edge cases, but you can turn that off for extra speed if your grammar is not too ambiguous.
 
 ## Install
 
