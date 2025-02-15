@@ -152,7 +152,7 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
       }
 
-      state.index += match[0].length;
+      state.index = re.lastIndex;
 
       return true;
 
@@ -206,9 +206,9 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    const isMatch = state.input.startsWith ( target, state.index );
+    const matched = state.input.startsWith ( target, state.index );
 
-    if ( isMatch ) {
+    if ( matched ) {
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
