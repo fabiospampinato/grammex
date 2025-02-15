@@ -37,11 +37,17 @@ const isRegExp = ( value: unknown ): value is RegExp => {
 
 };
 
-const isRegExpCapturing = ( re: RegExp ): boolean => { //TODO: Implement this perfectly instead, by parsing the regex
+const isRegExpCapturing = (() => { //TODO: Implement this perfectly instead, by parsing the regex
 
-  return re.source.includes ( '(' );
+  const sourceRe = /\\\(|\((?!\?(?::|=|!|<=|<!))/;
 
-};
+  return ( re: RegExp ): boolean => {
+
+    return sourceRe.test ( re.source );
+
+  };
+
+})();
 
 const isRegExpStatic = (() => { //TODO: Implement this perfectly instead, by parsing the regex
 
