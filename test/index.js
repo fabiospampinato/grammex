@@ -242,6 +242,20 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'does not swallow errors', t => {
+
+      try {
+
+        validate ( 'foo', () => Unknown () );
+
+      } catch ( error ) {
+
+        t.is ( error.message, 'Unknown is not defined' );
+
+      }
+
+    });
+
   });
 
   describe ( 'match', it => {

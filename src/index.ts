@@ -26,17 +26,11 @@ const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] =
 
 const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): boolean => {
 
-  try {
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
+  const matched = resolve ( rule )( state );
+  const validated = matched && state.index === input.length;
 
-    parse ( input, rule, options );
-
-    return true;
-
-  } catch {
-
-    return false;
-
-  }
+  return validated;
 
 };
 

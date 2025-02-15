@@ -9,7 +9,7 @@ The following functions for executing rules are provided:
 | Function                       | Description                                                                                                                              |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | `parse(input,rule,options)`    | Parses an input string with a given rule and options. It throws if parsing fails, including if some of the input string wasn't consumed. |
-| `validate(input,rule,options)` | Parses an input string with a given rule and options. It always returns a boolean.                                                      |
+| `validate(input,rule,options)` | Parses an input string with a given rule and options. It returns a boolean.                                                              |
 
 The following functions for creating a primitive rule are provided:
 
