@@ -241,6 +241,7 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
+  const isBacktrackable = ( min > 1 );
 
   return memoizable ( handleable ( backtrackable ( ( state: State<T> ): boolean => {
 
@@ -261,7 +262,7 @@ const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: Compound
 
     return ( repetitions >= min );
 
-  }), handler ));
+  }, isBacktrackable ), handler ));
 
 };
 
@@ -364,7 +365,7 @@ const lookahead = <T> ( rule: Rule<T>, result: boolean ): ExplicitRule<T> => {
 
     return erule ( state ) === result;
 
-  }, true );
+  }, true, true );
 
 };
 
@@ -382,9 +383,11 @@ const positive = <T> ( rule: Rule<T> ): ExplicitRule<T> => {
 
 /* RULES - DECORATORS */
 
-const backtrackable = <T> ( rule: Rule<T>, force: boolean = false ): ExplicitRule<T> => {
+const backtrackable = <T> ( rule: Rule<T>, enabled: boolean = true, force: boolean = false ): ExplicitRule<T> => {
 
   const erule = resolve ( rule );
+
+  if ( !enabled ) return erule;
 
   return ( state: State<T> ): boolean => {
 
