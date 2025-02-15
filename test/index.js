@@ -152,6 +152,27 @@ describe ( 'Grammex', it => {
 
     });
 
+    it ( 'supports silencing primitive handlers, not calling them', t => {
+
+      parse ( 'foo', match ( 'foo', () => t.fail () ), { silent: true } );
+      parse ( 'foo', match ( /foo/, () => t.fail () ), { silent: true } );
+      parse ( 'ooo', star ( 'o', () => t.fail () ), { silent: true } );
+      parse ( 'ooo', match ( ['o'], () => t.fail () ), { silent: true } );
+
+      t.pass ();
+
+    });
+
+    it ( 'supports silencing compound handlers, not calling them', t => {
+
+      const rule = and ( ['a', 'b'], () => t.fail () );
+
+      parse ( 'ab', rule, { silent: true } );
+
+      t.pass ();
+
+    });
+
     it ( 'checks if the entire input has been consumed', t => {
 
       const r1 = check ( 'foo', 'foo' );
@@ -253,6 +274,27 @@ describe ( 'Grammex', it => {
         t.is ( error.message, 'Unknown is not defined' );
 
       }
+
+    });
+
+    it ( 'supports silencing primitive handlers, not calling them', t => {
+
+      validate ( 'foo', match ( 'foo', () => t.fail () ), { silent: true } );
+      validate ( 'foo', match ( /foo/, () => t.fail () ), { silent: true } );
+      validate ( 'ooo', star ( 'o', () => t.fail () ), { silent: true } );
+      validate ( 'ooo', match ( ['o'], () => t.fail () ), { silent: true } );
+
+      t.pass ();
+
+    });
+
+    it ( 'supports silencing compound handlers, not calling them', t => {
+
+      const rule = and ( ['a', 'b'], () => t.fail () );
+
+      validate ( 'ab', rule, { silent: true } );
+
+      t.pass ();
 
     });
 
