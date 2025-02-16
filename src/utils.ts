@@ -19,6 +19,12 @@ const isFunctionNullary = ( value: Function ): value is (() => unknown) => {
 
 };
 
+const isFunctionStrictlyNullary = ( value: Function ): boolean => {
+
+  return value.length === 0 && value.toString ().startsWith ( '() =>' );
+
+};
+
 const isNumber = ( value: unknown ): value is number => {
 
   return typeof value === 'number';
@@ -95,4 +101,4 @@ const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
 
 /* EXPORT */
 
-export {isArray, isFunction, isFunctionNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize};
+export {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize};
