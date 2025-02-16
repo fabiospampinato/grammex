@@ -8,7 +8,7 @@ import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule
 
 const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] => {
 
-  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const indexMax = Math.max ( state.index, state.indexBacktrackMax );
 
@@ -26,7 +26,7 @@ const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] =
 
 const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): boolean => {
 
-  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const validated = matched && state.index === input.length;
 
@@ -463,26 +463,59 @@ const memoizable = (() => {
       if ( state.options.memoization === false ) return erule ( state );
 
       const indexStart = state.index;
+      const indexMemoizationMax = state.indexMemoizationMax;
+      const isPotentiallyCached = indexStart <= indexMemoizationMax;
       const cache = ( state.cache[ruleId] ||= new Map () );
-      const cached = cache.get ( indexStart );
 
-      if ( cached === false ) {
+      if ( isPotentiallyCached ) {
 
-        return false;
+        const cached = cache.get ( indexStart );
 
-      } else if ( isNumber ( cached ) ) {
+        if ( cached === false ) {
 
-        state.index = cached;
+          return false;
 
-        return true;
+        } else if ( isNumber ( cached ) ) {
 
-      } else if ( cached ) {
+          state.index = cached;
 
-        state.index = cached.index;
+          return true;
 
-        if ( cached.output?.length ) {
+        } else if ( cached ) {
 
-          state.output.push ( ...cached.output );
+          state.index = cached.index;
+
+          if ( cached.output?.length ) {
+
+            state.output.push ( ...cached.output );
+
+          }
+
+          return true;
+
+        }
+
+      }
+
+      state.indexMemoizationMax = Math.max ( indexMemoizationMax, indexStart );
+
+      const lengthStart = state.output.length;
+      const matched = erule ( state );
+
+      if ( matched ) {
+
+        const indexEnd = state.index;
+        const lengthEnd = state.output.length;
+
+        if ( lengthEnd > lengthStart ) {
+
+          const output = state.output.slice ( lengthStart, lengthEnd );
+
+          cache.set ( indexStart, { index: indexEnd, output } );
+
+        } else {
+
+          cache.set ( indexStart, indexEnd );
 
         }
 
@@ -490,35 +523,9 @@ const memoizable = (() => {
 
       } else {
 
-        const lengthStart = state.output.length;
-        const matched = erule ( state );
+        cache.set ( indexStart, false );
 
-        if ( matched ) {
-
-          const indexEnd = state.index;
-          const lengthEnd = state.output.length;
-
-          if ( lengthEnd > lengthStart ) {
-
-            const output = state.output.slice ( lengthStart, lengthEnd );
-
-            cache.set ( indexStart, { index: indexEnd, output } );
-
-          } else {
-
-            cache.set ( indexStart, indexEnd );
-
-          }
-
-          return true;
-
-        } else {
-
-          cache.set ( indexStart, false );
-
-          return false;
-
-        }
+        return false;
 
       }
 
