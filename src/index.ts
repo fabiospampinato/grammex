@@ -126,7 +126,7 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
 
 const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  return memoizable (( state: State<T> ): boolean => {
+  return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
     re.lastIndex = state.index;
 
@@ -156,13 +156,13 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
     }
 
-  });
+  };
 
 };
 
 const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  return memoizable (( state: State<T> ): boolean => {
+  return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
     re.lastIndex = state.index;
 
@@ -192,7 +192,7 @@ const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ):
 
     }
 
-  });
+  };
 
 };
 
