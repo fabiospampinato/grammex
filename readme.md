@@ -55,7 +55,7 @@ The following options are supported:
 | `memoization` | `true` by default. If enabled this lowers the time complexity of the parser, but it can have a negative impact on performance for grammars and inputs with not a lot of backtracking happening. |
 | `silent`      | `false` by default. If enabled then rules callbacks are not called, this enables faster validation if you have side-effects-free callbacks.                                                     |
 
-Basically you should create some primitive rules with `match`, combine those into higher-level rules, decide which one of those will be your "root" rule, and use that to `parse` or `validate` an input string.
+Basically you should create some primitive rules with `match`, combine those into higher-order rules, decide which one of those will be your "root" rule, and use that to `parse` or `validate` an input string.
 
 If a `parse` call is successful that means that a number of rules successfully matched the entire input string, each time a rule matches its `cb` function is called and its return value is appended to the output stream -- `parse` will simply return you this output stream.
 
