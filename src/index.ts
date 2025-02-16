@@ -497,10 +497,10 @@ const memoizable = (() => {
 
       }
 
-      state.indexMemoizationMax = Math.max ( indexMemoizationMax, indexStart );
-
       const lengthStart = state.output.length;
       const matched = erule ( state );
+
+      state.indexMemoizationMax = Math.max ( state.indexMemoizationMax, indexStart );
 
       if ( matched ) {
 
