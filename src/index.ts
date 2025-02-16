@@ -110,7 +110,7 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
     const flags = target.flags.replace ( /y|$/, 'y' );
     const re = new RegExp ( source, flags );
 
-    if ( isRegExpCapturing ( target ) ) {
+    if ( isRegExpCapturing ( target ) && handler ) {
 
       return regexCapturing ( re, handler );
 
