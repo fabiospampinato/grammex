@@ -8,7 +8,7 @@ import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule
 
 const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] => {
 
-  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, cacheQueue: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const indexMax = Math.max ( state.index, state.indexBacktrackMax );
 
@@ -26,7 +26,7 @@ const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] =
 
 const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): boolean => {
 
-  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, cacheQueue: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const validated = matched && state.index === input.length;
 
@@ -465,9 +465,26 @@ const memoizable = (() => {
       const indexStart = state.index;
       const indexMemoizationMax = state.indexMemoizationMax;
       const isPotentiallyCached = indexStart <= indexMemoizationMax;
-      const cache = ( state.cache[ruleId] ||= new Map () );
+      const cacheQueue = ( state.cacheQueue[ruleId] ||= [] );
 
       if ( isPotentiallyCached ) {
+
+        const cache = ( state.cache[ruleId] ||= new Map () );
+
+        if ( cacheQueue.length ) { // There are some pending cache entires to register, which is somewhat expensive
+
+          for ( let i = 0, l = cacheQueue.length; i < l; i += 2 ) {
+
+            const key = cacheQueue[i * 2] as number; //TSC
+            const value = cacheQueue[i * 2 + 1];
+
+            cache.set ( key, value );
+
+          }
+
+          cacheQueue.length = 0;
+
+        }
 
         const cached = cache.get ( indexStart );
 
@@ -511,11 +528,11 @@ const memoizable = (() => {
 
           const output = state.output.slice ( lengthStart, lengthEnd );
 
-          cache.set ( indexStart, { index: indexEnd, output } );
+          cacheQueue.push ( indexStart, { index: indexEnd, output } );
 
         } else {
 
-          cache.set ( indexStart, indexEnd );
+          cacheQueue.push ( indexStart, indexEnd );
 
         }
 
@@ -523,7 +540,7 @@ const memoizable = (() => {
 
       } else {
 
-        cache.set ( indexStart, false );
+        cacheQueue.push ( indexStart, false );
 
         return false;
 
