@@ -19,11 +19,17 @@ const isFunctionNullary = ( value: Function ): value is (() => unknown) => {
 
 };
 
-const isFunctionStrictlyNullary = ( value: Function ): boolean => {
+const isFunctionStrictlyNullary = (() => {
 
-  return value.length === 0 && value.toString ().startsWith ( '() =>' );
+  const {toString} = Function.prototype;
 
-};
+  return ( value: Function ): boolean => {
+
+    return value.length === 0 && toString.call ( value ).startsWith ( '() =>' );
+
+  };
+
+})();
 
 const isNumber = ( value: unknown ): value is number => {
 
