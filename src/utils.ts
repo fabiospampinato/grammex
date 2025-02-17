@@ -22,10 +22,11 @@ const isFunctionNullary = ( value: Function ): value is (() => unknown) => {
 const isFunctionStrictlyNullary = (() => {
 
   const {toString} = Function.prototype;
+  const re = /^\(\s*\)\s*=>/;
 
   return ( value: Function ): boolean => {
 
-    return value.length === 0 && toString.call ( value ).startsWith ( '() =>' );
+    return value.length === 0 && re.test ( toString.call ( value ) );
 
   };
 
