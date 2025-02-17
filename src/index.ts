@@ -8,7 +8,7 @@ import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule
 
 const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] => {
 
-  const state: State<T> = { cache: {}, cacheQueue: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const indexMax = Math.max ( state.index, state.indexBacktrackMax );
 
@@ -26,7 +26,7 @@ const parse = <T> ( input: string, rule: Rule<T>, options: Options = {} ): T[] =
 
 const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): boolean => {
 
-  const state: State<T> = { cache: {}, cacheQueue: {}, input, index: 0, indexBacktrackMax: 0, indexMemoizationMax: 0, options, output: [] };
+  const state: State<T> = { cache: {}, input, index: 0, indexBacktrackMax: 0, options, output: [] };
   const matched = resolve ( rule )( state );
   const validated = matched && state.index === input.length;
 
@@ -467,13 +467,13 @@ const memoizable = (() => {
       if ( state.options.memoization === false ) return erule ( state );
 
       const indexStart = state.index;
-      const indexMemoizationMax = state.indexMemoizationMax;
-      const isPotentiallyCached = indexStart <= indexMemoizationMax;
-      const cacheQueue = ( state.cacheQueue[ruleId] ||= [] );
+      const cache = ( state.cache[ruleId] ||= { indexMax: -1, queue: [] } );
+      const cacheQueue = cache.queue;
+      const isPotentiallyCached = ( indexStart <= cache.indexMax );
 
       if ( isPotentiallyCached ) {
 
-        const cache = ( state.cache[ruleId] ||= new Map () );
+        const cacheStore = ( cache.store ||= new Map () );
 
         if ( cacheQueue.length ) { // There are some pending cache entires to register, which is somewhat expensive
 
@@ -482,7 +482,7 @@ const memoizable = (() => {
             const key = cacheQueue[i * 2] as number; //TSC
             const value = cacheQueue[i * 2 + 1];
 
-            cache.set ( key, value );
+            cacheStore.set ( key, value );
 
           }
 
@@ -490,7 +490,7 @@ const memoizable = (() => {
 
         }
 
-        const cached = cache.get ( indexStart );
+        const cached = cacheStore.get ( indexStart );
 
         if ( cached === false ) {
 
@@ -521,7 +521,7 @@ const memoizable = (() => {
       const lengthStart = state.output.length;
       const matched = erule ( state );
 
-      state.indexMemoizationMax = Math.max ( state.indexMemoizationMax, indexStart );
+      cache.indexMax = Math.max( cache.indexMax, indexStart );
 
       if ( matched ) {
 

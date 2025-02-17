@@ -8,12 +8,11 @@ type ExplicitRule<T> = ( state: State<T> ) => boolean;
 type ImplicitRule<T> = string | RegExp | Rule<T>[] | { [Key in string]: Rule<T> } | (() => Rule<T>);
 type Rule<T> = ExplicitRule<T> | ImplicitRule<T>;
 
-type Cache<T> = Record<number, Map<number, CacheValue<T>>>;
-type CacheQueue<T> = Record<number, (number | CacheValue<T>)[]>;
+type Cache<T> = Record<number, { indexMax: number, queue: (number | CacheValue<T>)[], store?: Map<number, CacheValue<T>> }>;
 type CacheValue<T> = { index: number, output?: T[] } | number | false;
 type Options = { memoization?: boolean, silent?: boolean };
-type State<T> = { cache: Cache<T>, cacheQueue: CacheQueue<T>, input: string, index: number, indexBacktrackMax: number, indexMemoizationMax: number, options: Options, output: T[] };
+type State<T> = { cache: Cache<T>, input: string, index: number, indexBacktrackMax: number, options: Options, output: T[] };
 
 /* EXPORT */
 
-export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Cache, CacheQueue, CacheValue, Options, State};
+export type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Cache, CacheValue, Options, State};
