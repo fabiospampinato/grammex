@@ -2,7 +2,9 @@
 /* IMPORT */
 
 import {describe} from 'fava';
+import fs from 'node:fs';
 import {parse, validate, match, repeat, optional, star, plus, and, or, jump, negative, positive, lazy} from '../dist/index.js';
+import JSON_GRAMMAR from '../tasks/grammar.js';
 
 /* HELPERS */
 
@@ -904,6 +906,17 @@ describe ( 'Grammex', it => {
     t.false ( validate ( 'Fri Jun 170 03:50:56 PDT 2011', Timestamp ) );
     t.false ( validate ( 'Fri Juns 17 03:50:56 PDT 2011', Timestamp ) );
     t.false ( validate ( 'Friz Jun 17 03:50:56 PDT 2011', Timestamp ) );
+
+  });
+
+  it ( 'can implement the json grammar', t => {
+
+    const JSON_SAMPLE = fs.readFileSync ( 'tasks/sample.json', 'utf8' );
+
+    const native = JSON.stringify ( JSON.parse ( JSON_SAMPLE ) );
+    const custom = JSON.stringify ( parse ( JSON_SAMPLE, JSON_GRAMMAR )[0] );
+
+    t.is ( native, custom );
 
   });
 
