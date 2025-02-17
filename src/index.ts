@@ -136,7 +136,7 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
 
 };
 
-const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
+const regexCapturing = <T> ( re: RegExp, handler: PrimitiveHandler<T> ): ExplicitRule<T> => {
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
@@ -151,9 +151,9 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
       const indexEnd = re.lastIndex;
 
-      if ( !isUndefined ( handler ) && !state.options.silent ) {
+      if ( !state.options.silent ) {
 
-        const output = isFunction ( handler ) ? handler ( ...match, input, `${indexStart}` ) : handler;
+        const output = handler ( ...match, input, `${indexStart}` );
 
         if ( !isUndefined ( output ) ) {
 
