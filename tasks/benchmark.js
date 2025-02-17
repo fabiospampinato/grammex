@@ -13,34 +13,34 @@ const JSON_SAMPLE = fs.readFileSync ( 'tasks/sample.json', 'utf8' );
 /* MAIN */
 
 benchmark.config ({
-  iterations: 1000
+  iterations: 1_000
 });
 
 benchmark ({
-  name: 'grammex.parse.memoized',
+  name: 'grammex.memoized',
   fn: () => {
     parse ( JSON_SAMPLE, JSON_GRAMMAR );
   }
 });
 
 benchmark ({
-  name: 'grammex.parse.unmemoized',
+  name: 'grammex.memoized.silent',
+  fn: () => {
+    parse ( JSON_SAMPLE, JSON_GRAMMAR, { silent: true } );
+  }
+});
+
+benchmark ({
+  name: 'grammex.unmemoized',
   fn: () => {
     parse ( JSON_SAMPLE, JSON_GRAMMAR, { memoization: false } );
   }
 });
 
 benchmark ({
-  name: 'grammex.validate.memoized',
+  name: 'grammex.unmemoized.silent',
   fn: () => {
-    validate ( JSON_SAMPLE, JSON_GRAMMAR );
-  }
-});
-
-benchmark ({
-  name: 'grammex.validate.unmemoized',
-  fn: () => {
-    validate ( JSON_SAMPLE, JSON_GRAMMAR, { memoization: false } );
+    parse ( JSON_SAMPLE, JSON_GRAMMAR, { memoization: false, silent: true } );
   }
 });
 
