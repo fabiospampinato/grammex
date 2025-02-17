@@ -77,8 +77,8 @@ const chars = <T> ( target: string[], handler?: PrimitiveHandler<T> | T ): Expli
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
-        const target = state.input.slice ( indexStart, indexEnd );
-        const output = isFunction ( handler ) ? handler ( target, input, String ( indexStart ) ) : handler;
+        const target = input.slice ( indexStart, indexEnd );
+        const output = isFunction ( handler ) ? handler ( target, input, `${indexStart}` ) : handler;
 
         if ( !isUndefined ( output ) ) {
 
@@ -128,17 +128,20 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    re.lastIndex = state.index;
+    const indexStart = state.index;
+    const input = state.input;
 
-    const match = re.exec ( state.input );
+    re.lastIndex = indexStart;
+
+    const match = re.exec ( input );
 
     if ( match ) {
 
-      const endIndex = re.lastIndex;
+      const indexEnd = re.lastIndex;
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
-        const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( state.index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( ...match, input, `${indexStart}` ) : handler;
 
         if ( !isUndefined ( output ) ) {
 
@@ -148,7 +151,7 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
       }
 
-      state.index = endIndex;
+      state.index = indexEnd;
 
       return true;
 
@@ -166,17 +169,20 @@ const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ):
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    re.lastIndex = state.index;
+    const indexStart = state.index;
+    const input = state.input;
 
-    const matched = re.test ( state.input );
+    re.lastIndex = indexStart;
+
+    const matched = re.test ( input );
 
     if ( matched ) {
 
-      const endIndex = re.lastIndex;
+      const indexEnd = re.lastIndex;
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
-        const output = isFunction ( handler ) ? handler ( state.input.slice ( state.index, re.lastIndex ), state.input, String ( state.index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( input.slice ( indexStart, indexEnd ), input, `${indexStart}` ) : handler;
 
         if ( !isUndefined ( output ) ) {
 
@@ -186,7 +192,7 @@ const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ):
 
       }
 
-      state.index = endIndex;
+      state.index = indexEnd;
 
       return true;
 
@@ -204,13 +210,15 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
   return ( state: State<T> ): boolean => { // Not memoized on purpose, as the memoization is likely to cost more than the re-execution
 
-    const matched = state.input.startsWith ( target, state.index );
+    const indexStart = state.index;
+    const input = state.input;
+    const matched = input.startsWith ( target, indexStart );
 
     if ( matched ) {
 
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
-        const output = isFunction ( handler ) ? handler ( target, state.input, String ( state.index ) ) : handler;
+        const output = isFunction ( handler ) ? handler ( target, input, `${indexStart}` ) : handler;
 
         if ( !isUndefined ( output ) ) {
 
