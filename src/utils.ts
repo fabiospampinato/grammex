@@ -19,16 +19,16 @@ const isFunctionNullary = ( value: Function ): value is (() => unknown) => {
 
 };
 
-const isFunctionStrictlyNullary = (() => {
+const isFunctionStrictlyNullaryOrUnary = (() => {
 
   const {toString} = Function.prototype;
-  const re = /^\(\s*\)\s*=>/;
+  const re = /(?:^\(\s*(?:[^,.()]|\.(?!\.\.))*\s*\)\s*=>|^\s*[a-zA-Z$_][a-zA-Z0-9$_]*\s*=>)/;
 
   return ( value: Function ): boolean => {
 
-    return value.length === 0 && re.test ( toString.call ( value ) );
+    return ( value.length === 0 || value.length === 1 ) && re.test ( toString.call ( value ) );
 
-  };
+  }
 
 })();
 
@@ -108,4 +108,4 @@ const memoize = <T, U> ( fn: ( arg: T ) => U ): (( arg: T ) => U) => {
 
 /* EXPORT */
 
-export {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize};
+export {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullaryOrUnary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize};

@@ -1,7 +1,7 @@
 
 /* IMPORT */
 
-import {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize} from './utils';
+import {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullaryOrUnary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize} from './utils';
 import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
 
 /* MAIN */
@@ -110,7 +110,7 @@ const regex = <T> ( target: RegExp, handler?: PrimitiveHandler<T> | T ): Explici
     const flags = target.flags.replace ( /y|$/, 'y' );
     const re = new RegExp ( source, flags );
 
-    if ( isRegExpCapturing ( target ) && isFunction ( handler ) && !isFunctionStrictlyNullary ( handler ) ) {
+    if ( isRegExpCapturing ( target ) && isFunction ( handler ) && !isFunctionStrictlyNullaryOrUnary ( handler ) ) {
 
       return regexCapturing ( re, handler );
 
