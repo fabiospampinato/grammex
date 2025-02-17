@@ -134,6 +134,8 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
     if ( match ) {
 
+      const endIndex = re.lastIndex;
+
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const output = isFunction ( handler ) ? handler ( ...match, state.input, String ( state.index ) ) : handler;
@@ -146,7 +148,7 @@ const regexCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ): Ex
 
       }
 
-      state.index = re.lastIndex;
+      state.index = endIndex;
 
       return true;
 
@@ -170,6 +172,8 @@ const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ):
 
     if ( matched ) {
 
+      const endIndex = re.lastIndex;
+
       if ( !isUndefined ( handler ) && !state.options.silent ) {
 
         const output = isFunction ( handler ) ? handler ( state.input.slice ( state.index, re.lastIndex ), state.input, String ( state.index ) ) : handler;
@@ -182,7 +186,7 @@ const regexNonCapturing = <T> ( re: RegExp, handler?: PrimitiveHandler<T> | T ):
 
       }
 
-      state.index = re.lastIndex;
+      state.index = endIndex;
 
       return true;
 

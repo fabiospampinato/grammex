@@ -953,4 +953,23 @@ describe ( 'Grammex', it => {
 
   });
 
+  it ( 'supports rules that call themselves in their handler', t => {
+
+    const rule1 = match ( 'aaa', () => validate ( 'bbb', rule1 ) );
+    const result1 = validate ( 'aaaaaa', star ( rule1 ) );
+
+    t.true ( result1 );
+
+    const rule2 = match ( /aaa?/, match => ( match === 'aaa' ) && validate ( 'aa', rule2 ) );
+    const result2 = validate ( 'aaaaaa', star ( rule2 ) );
+
+    t.true ( result2 );
+
+    const rule3 = match ( /(aaa?)/, match => ( match === 'aaa' ) && validate ( 'aa', rule3 ) );
+    const result3 = validate ( 'aaaaaa', star ( rule3 ) );
+
+    t.true ( result3 );
+
+  });
+
 });
