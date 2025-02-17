@@ -38,7 +38,19 @@ const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): bo
 
 const match = <T> ( target: RegExp | string | string[], handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
-  return isArray ( target ) ? chars ( target, handler ) : isString ( target ) ? string ( target, handler ) : regex ( target, handler );
+  if ( isArray ( target ) ) {
+
+    return chars ( target, handler );
+
+  } else if ( isString ( target ) ) {
+
+    return string ( target, handler );
+
+  } else {
+
+    return regex ( target, handler );
+
+  }
 
 };
 
@@ -529,7 +541,7 @@ const memoizable = (() => {
       const lengthStart = state.output.length;
       const matched = erule ( state );
 
-      cache.indexMax = Math.max( cache.indexMax, indexStart );
+      cache.indexMax = Math.max ( cache.indexMax, indexStart );
 
       if ( matched ) {
 
