@@ -52,7 +52,7 @@ const isRegExp = ( value: unknown ): value is RegExp => {
 
 const isRegExpCapturing = (() => { //TODO: Implement this perfectly instead, by parsing the regex
 
-  const sourceRe = /\\\(|\((?!\?(?::|=|!|<=|<!))/;
+  const sourceRe = /^(?:\\.|\[(?:\\.|[^\\\]])*\]|[^\\\[])*?\((?:[^?]|\?<[^=!])/;
 
   return ( re: RegExp ): boolean => {
 
