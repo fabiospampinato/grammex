@@ -1,7 +1,7 @@
 
 /* MAIN */
 
-type CompoundHandler<T> = ( token: T[] ) => T | undefined;
+type CompoundHandler<T, U> = ( token: T[] ) => U | undefined;
 type PrimitiveHandler<T> = ( ...args: string[] ) => T | undefined; // ( ...args: [consumed: string, ...groups: string[], input: string, index: string] ) => T | undefined
 
 type ExplicitRule<T> = ( state: State<T> ) => boolean;

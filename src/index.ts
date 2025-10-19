@@ -256,7 +256,7 @@ const string = <T> ( target: string, handler?: PrimitiveHandler<T> | T ): Explic
 
 /* RULES - REPETITION */
 
-const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const repeat = <T, U = T> ( rule: Rule<T>, min: number, max: number, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erule = resolve ( rule );
   const isBacktrackable = ( min > 1 );
@@ -284,19 +284,19 @@ const repeat = <T> ( rule: Rule<T>, min: number, max: number, handler?: Compound
 
 };
 
-const optional = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const optional = <T, U = T> ( rule: Rule<T>, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   return repeat ( rule, 0, 1, handler );
 
 };
 
-const star = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const star = <T, U = T> ( rule: Rule<T>, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   return repeat ( rule, 0, Infinity, handler );
 
 };
 
-const plus = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const plus = <T, U = T> ( rule: Rule<T>, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   return repeat ( rule, 1, Infinity, handler );
 
@@ -304,7 +304,7 @@ const plus = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T
 
 /* RULES - SEQUENCE */
 
-const and = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const and = <T, U = T> ( rules: Rule<T>[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erules = rules.map ( resolve );
 
@@ -324,7 +324,7 @@ const and = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule
 
 /* RULES - CHOICE */
 
-const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const or = <T, U = T> ( rules: Rule<T>[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erules = rules.map ( resolve );
 
@@ -342,7 +342,7 @@ const or = <T> ( rules: Rule<T>[], handler?: CompoundHandler<T> ): ExplicitRule<
 
 };
 
-const jump = <T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const jump = <T, U = T> ( rules: Record<string, Rule<T>>, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erules: Record<string, ExplicitRule<T>> = {};
 
@@ -437,13 +437,13 @@ const backtrackable = <T> ( rule: Rule<T>, enabled: boolean = true, force: boole
 
 };
 
-const handleable = <T> ( rule: Rule<T>, handler?: CompoundHandler<T> ): ExplicitRule<T> => {
+const handleable = <T, U = T> ( rule: Rule<T>, handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erule = resolve ( rule );
 
-  if ( !handler ) return erule;
+  if ( !handler ) return erule as unknown as ExplicitRule<U>; //TSC: incorrect types, but correct behavior
 
-  return ( state: State<T> ): boolean => {
+  return ( state: State<any> ): boolean => { //TSC: incorrect types, but correct behavior
 
     if ( state.options.silent ) return erule ( state );
 
