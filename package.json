@@ -3,7 +3,7 @@
   "repository": "github:fabiospampinato/grammex",
   "description": "A tiny, PEG-like system for building language grammars with regexes.",
   "license": "MIT",
-  "version": "3.1.11",
+  "version": "3.1.12",
   "type": "module",
   "main": "dist/index.js",
   "exports": "./dist/index.js",
