@@ -2,7 +2,9 @@
 /* IMPORT */
 
 import {isArray, isFunction, isFunctionNullary, isFunctionStrictlyNullaryOrUnary, isNumber, isObject, isRegExp, isRegExpCapturing, isRegExpStatic, isString, isUndefined, memoize} from './utils';
-import type {CompoundHandler, PrimitiveHandler, ExplicitRule, ImplicitRule, Rule, Options, State} from './types';
+import type {CompoundHandler, PrimitiveHandler} from './types';
+import type {ExplicitRule, ImplicitRule, Rule, MappedRule} from './types';
+import type {Options, State} from './types';
 
 /* MAIN */
 
@@ -304,7 +306,7 @@ const plus = <T, U = T> ( rule: Rule<T>, handler?: CompoundHandler<T, U> ): Expl
 
 /* RULES - SEQUENCE */
 
-const and = <T, U = T> ( rules: Rule<T>[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
+const and = <T, U = T> ( rules: (MappedRule<T> | Rule<T>)[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erules = rules.map ( resolve );
 
@@ -324,7 +326,7 @@ const and = <T, U = T> ( rules: Rule<T>[], handler?: CompoundHandler<T, U> ): Ex
 
 /* RULES - CHOICE */
 
-const or = <T, U = T> ( rules: Rule<T>[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
+const or = <T, U = T> ( rules: (MappedRule<T> | Rule<T>)[], handler?: CompoundHandler<T, U> ): ExplicitRule<U> => {
 
   const erules = rules.map ( resolve );
 
