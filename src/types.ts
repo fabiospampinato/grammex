@@ -11,7 +11,7 @@ type MappedRule<T> = T extends any ? Rule<T> : never;
 
 type Cache<T> = Record<number, { indexMax: number, queue: (number | CacheValue<T>)[], store?: Map<number, CacheValue<T>> }>;
 type CacheValue<T> = { index: number, output?: T[] } | number | false;
-type Options = { memoization?: boolean, silent?: boolean };
+type Options = { [K: string]: unknown, memoization?: boolean, silent?: boolean };
 type State<T> = { cache: Cache<T>, input: string, index: number, indexBacktrackMax: number, options: Options, output: T[] };
 
 /* EXPORT */

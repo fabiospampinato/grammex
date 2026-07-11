@@ -36,7 +36,7 @@ const validate = <T> ( input: string, rule: Rule<T>, options: Options = {} ): bo
 
 };
 
-/* RULES - PRIMIVITE */
+/* RULES - PRIMITIVE */
 
 const match = <T> ( target: RegExp | string | string[], handler?: PrimitiveHandler<T> | T ): ExplicitRule<T> => {
 
