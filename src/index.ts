@@ -497,7 +497,7 @@ const memoizable = (() => {
 
         const cacheStore = ( cache.store ||= new Map () );
 
-        if ( cacheQueue.length ) { // There are some pending cache entires to register, which is somewhat expensive
+        if ( cacheQueue.length ) { // There are some pending cache entries to register, which is somewhat expensive
 
           for ( let i = 0, l = cacheQueue.length; i < l; i += 2 ) {
 
